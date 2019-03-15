@@ -44,3 +44,19 @@ def isContainMissValue(_df):
 '''
 def FillMissValue(_df):
     return 0
+
+'''
+'''
+def compute_ChangePoint(_series,_mode="first"):
+    minList = computeIndex(_series).values[:,2]
+    if _mode == "first" :
+        minIndexList =  [_series[_series[i] == minList[i]].index.values[0] for i in range(0, 9, 1)][:]
+    else:
+        minIndexList = [_series[_series[i] == minList[i]].index.values[-1] for i in range(0, 9, 1)][:]
+    # minIndexList = _series[_series[0] == minList[0]].index.values[-1]
+    return  minIndexList
+    # return  _series
+    # return [_series[_series[i]>minList[2]][i]  for i in range(1, len(_series) - 1, 1)][:]
+    # print(minList[0])
+    # return _series[_series[0]>minList[0] and _series[0].index ][0]
+

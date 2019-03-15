@@ -10,23 +10,30 @@ from sklearn import metrics
 
 rf = RandomForestRegressor()
 # # 绘制数据集
-path = "D://C线全数据延时对齐1批.xlsx"
-df = bsPre.readExcel(path, 0)
-useCol = [1,3,5,7,9,11,15]
-#df = DataFrame(bsTrans.diff(df.values[:,useCol]))
-df = DataFrame(df.values[:,useCol])
-diffCol = [0,1,2,3,4,5,6]
-yCol = 6
-freq = 6
+path = "D://C线10批数据（20190315）.xlsx"
+for i in range(0,9,1):
+    df = bsPre.readExcel(path, i)
+    useCol = [1,3,5,7,9,11,13,15,17]
+    #df = DataFrame(bsTrans.diff(df.values[:,useCol]))
+    df = DataFrame(df.values[:,useCol])
+    diffCol = [0,1,2,3,4,5,6]
+    yCol = 6
+    freq = 6
 
-#画图
-# pyplot.plot(df.values[:,[6]])
-# pyplot.show()
-# exit()
-# df = df[:]
+    #画图
+    # pyplot.plot(df.values[:,[6]])
+    # pyplot.show()
+    # exit()
+    df = df[:]
 
+    # print(df)
 
-cp.singlePlot(df)
+    # print(bsPre.computeIndex(df))
+    df = df[800:int(len(df)/2)-1500]
+    cp.singlePlot(df)
+    rtn=bsPre.compute_ChangePoint(df,_mode="last")
+    print(rtn)
+    print(rtn[6]-rtn[0],rtn[8]-rtn[6])
 exit()
 
 #原始
