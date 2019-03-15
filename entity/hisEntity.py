@@ -3,7 +3,11 @@ class HisEntity:
     StageName=""
     ProcessName=""
     ParameterName=""
+    TagName=""
     HisDf=None
+
+    def __init__(self,):
+        self
 
     def __init__(self, LineName, StageName, ProcessName, ParameterName, HisDf):
         self.LineName = LineName

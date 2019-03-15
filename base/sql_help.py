@@ -28,3 +28,7 @@ class Sql200:
         self.engine = self.GetEngine()
         df = pd.read_sql(sql=sql, con=self.engine)
         return df
+if __name__ == "__main__":
+    ms = Sql200()
+    df = ms.ExecQuery("SELECT * FROM B_Brand")
+    print(df)
