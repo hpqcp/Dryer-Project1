@@ -57,5 +57,30 @@ def getBatchData(_patten,_db):
     r.connection_pool.disconnect()
     return dt2
 
+def getBatchDataDelay(_db,startDelay,endDelay):
+    #获取批次数据
+    df1 = getBatchData("bYAR19033102903*",_db)
+    #获取开始结束时间
+    startTime =df1[0][0]
+    endTime = df1[0][len(df1)-1]
+    #获取所有数据
+    df2 = getBatchData("bYAR*", _db)
+    #截取时间段之间的数据
+    startdf = df2[df2[0].isin({startTime})]
+    enddf = df2[df2[0].isin({endTime})]
 
+    startIndex=startdf.index.values[0]
+    endIndex = enddf.index.values[0]
+
+    startIndex = startIndex - startDelay
+    endIndex = endIndex + endDelay
+    if(startIndex<0):
+        startIndex = 0
+    if(endIndex>len(df2)-1):
+        endIndex = len(df2)-1
+
+    df2=df2[startIndex:endIndex]
+    return df2
+
+getBatchDataDelay(1,100,100)
 
