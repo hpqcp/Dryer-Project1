@@ -46,3 +46,17 @@ def diff(_series):
 '''
 def trend(_series):
      return [2 if _series[i]<0 else 1  for i in range(0, len(_series)-1, 1)][:]
+
+'''数据对齐
+'''
+def  data_alignment(_df,_putTimes):
+    dfLen = _df.shape[1]
+    putLen = len(_putTimes)
+    maxPut = max(_putTimes)
+
+    rtnDF = DataFrame()
+    for i in range(0,dfLen,1):
+        dt = _df.values[_putTimes[i]:_putTimes[i] - maxPut,i]
+        rtnDF = rtnDF.append(pd.Series(dt),ignore_index=True)
+
+    return rtnDF

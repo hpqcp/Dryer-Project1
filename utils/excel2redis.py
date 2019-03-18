@@ -7,8 +7,8 @@ import datetime
 
 # pool = redis.ConnectionPool(host='127.0.0.1')
 # r = redis.Redis(connection_pool=pool)
-
-# path = "z://C线10批数据（20190315）.xlsx"
+#
+# path = "d://C线10批数据（20190315）.xlsx"
 # group = "t"  # t test data
 # factoryID="1" # 1Ky 2 hy 3qy
 # deptID = "z" # z zs j jb c cx

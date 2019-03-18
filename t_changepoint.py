@@ -283,9 +283,10 @@ df = DataFrame(df.values[:, useCol])
 yCol = 6
 # 时间频率
 freq = 6
-df = df[:int(len(df) / 4)]
+df = df[:]#int(len(df) / 4)]
 # df = df[35:49]
 cPlt.singlePlot(df, _title=batchStr)
+exit()
 # cp = bsPre.compute_ChangePoint(df, _mode="last")
 # print(cp)
 # df 批次数据 _stdGCount 移动极差样本数 _stdTop 极差topN
