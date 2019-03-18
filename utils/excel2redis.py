@@ -24,7 +24,7 @@ def getBatchData(_patten):
     pool = redis.ConnectionPool(host='127.0.0.1')
     r = redis.Redis(connection_pool=pool)
     key1 = r.keys(pattern=_patten)#"t1zc0000*")
-    dt =DataFrame([r.lrange(key1[i],0,-1) for i in range(0, len(key1), 1)][:])
+    dt =DataFrame([r.lrange(key1[i],0,-1) for i in range(1, len(key1), 1)][:])
     dt1=dt.sort_values(0)
     dt2=dt1.reset_index(drop=True)
     r.connection_pool.disconnect()
