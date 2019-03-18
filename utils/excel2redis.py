@@ -79,6 +79,7 @@ def getBatchDataDelay(_db,startDelay,endDelay):
     if(endIndex>len(df2)-1):
         endIndex = len(df2)-1
 
+
     df2=df2[startIndex:endIndex]
     return df2
 
