@@ -1,5 +1,7 @@
 import redis as redis
 from pandas import  DataFrame
+import base.data_preProcess as bsPre
+
 
 # pool = redis.ConnectionPool(host='127.0.0.1')
 # r = redis.Redis(connection_pool=pool)
@@ -21,12 +23,15 @@ from pandas import  DataFrame
 # exit()
 
 def getBatchData(_patten):
-    pool = redis.ConnectionPool(host='127.0.0.1')
-    r = redis.Redis(connection_pool=pool)
+    pool = redis.ConnectionPool(host='127.0.0.1',decode_responses=True)
+    r = redis.Redis(connection_pool=pool,decode_responses=True)
     key1 = r.keys(pattern=_patten)#"t1zc0000*")
     dt =DataFrame([r.lrange(key1[i],0,-1) for i in range(1, len(key1), 1)][:])
-    dt1=dt.sort_values(0)   
+    dt1=dt.sort_values(0)
     dt2=dt1.reset_index(drop=True)
+    for i in range(1,dt2.shape[1],1):
+        dt2[[i]]=dt2[[i]].astype('float')
+    # print(dt.dtypes)
     r.connection_pool.disconnect()
     return dt2
 

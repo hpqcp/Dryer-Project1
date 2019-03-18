@@ -10,13 +10,14 @@ import matplotlib.pyplot as pyplot
 from sklearn.model_selection import cross_val_score
 from sklearn.ensemble import RandomForestRegressor
 from sklearn import metrics
+from sklearn.cluster import KMeans
 
 rf = RandomForestRegressor()
 # # 绘制数据集
 # path = "z://C线10批数据（20190315）.xlsx"
 # df = bsPre.readExcel(path)
 
-df = rds.getBatchData("t1zc0000*")
+df = rds.getBatchData("t1zc0001*")
 
 useCol = [1,2,3,4,5,6,7,8,9]
 #df = DataFrame(bsTrans.diff(df.values[:,useCol]))
@@ -24,10 +25,10 @@ df = DataFrame(df.values[:,useCol])
 # diffCol = [0,1,2,3,4,5,6]
 yCol = 6
 freq = 6
-
-print(bsPre.computeIndex(df))
+# print(df.values[:2,0])
+# print(bsPre.computeIndex(df))
 df = df[:]#int(len(df)/2)]
-cp.singlePlot(df)
+# cp.singlePlot(df)
     # rtn=bsPre.compute_ChangePoint(df,_mode="last")
     # print(rtn)
     # print(rtn[6]-rtn[0],rtn[8]-rtn[6])
@@ -35,7 +36,23 @@ cp.singlePlot(df)
 # cp1=bsCp.Pettitt_change_point_detection(df.values[:,0])
 # cp2=bsCp.Kendall_change_point_detection(df.values[:,0])
 # print(cp1,cp2)
-# print(df.values[cp2,0])
+# print(df.values[cp1,0],df.values[cp2,0])
+model = KMeans(3)
+y = model.fit(df)
+# r = pd.concat([df.values[:,0], pd.Series(model.labels_, index = df.values[:,0].index)], axis = 1)
+import matplotlib.pyplot as plt
+fig = plt.figure()
+plt.xlabel('price')
+plt.ylabel('comnum')
+num = len(y.labels_)
+for i in range(0,num,1):
+    if(y[i]==0):
+        plt.plot(df.values[i,0],"*r")
+    elif(y[i]==1):
+        plt.plot(df.values[i,0],"sy")
+    elif(y[i]==2):
+        plt.plot(df.values[i,0],"pb")
+plt.show()
 exit()
 
 #原始
