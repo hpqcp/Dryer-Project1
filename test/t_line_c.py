@@ -16,15 +16,15 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn import metrics
 
 # 定义使用的列
-useCol = [1, 5, 6, 7, 9]  # , 10, 11, 12]
+useCol = [1, 5, 6]#, 7, 9]  # , 10, 11, 12]
 # df = DataFrame(df.values[:, useCol])
-diffCol = [0, 1, 2, 3, 4]
+diffCol = [0, 1, 2]#, 3, 4]
 # 目标列Y
-yCol = 4
+yCol = 2
 # 时间频率
 freq = 6
 # 延时
-putTimes = [0, 90, 136, 361, 390, 420]
+putTimes = [0, 90, 136]#, 361, 390, 420]
 
 
 def MergeBatch(_batchList,_db):
@@ -41,7 +41,7 @@ def MergeBatch(_batchList,_db):
         df = bsTrans.data_alignment(df, putTimes)
         df = df[1500:5000]
         dfAll = dfAll.append(df)
-        print(dfAll.shape[0])
+        # print(dfAll.shape[0])
     dfAll = dfAll.reset_index(drop=True)
     return dfAll
 
@@ -72,14 +72,14 @@ cPlt.singlePlot(df, _title=batchStr)
 df = df[:]  # int(len(df) / 4)]
 # 原始
 # xa, xb, ya, yb = bsTrans.dataPartition(df.iloc[:, diffCol], yCol)
-xa = df.iloc[:, [0,1,2,3]]
-ya = df.iloc[:,4]
+xa = df.iloc[:, [0,1]]#,2,3]]
+ya = df.iloc[:,2]
 df1 = rds.getBatchData("t1zc0000*", 0)
 df1 = DataFrame(df1.values[:, useCol])
 df1 = bsTrans.data_alignment(df1, putTimes)
 df1 = df1[1500:5000]
-xb = df1.iloc[:, [0,1,2,3]]
-yb = df1.iloc[:,4]
+xb = df1.iloc[:, [0,1]]#,2,3]]
+yb = df1.iloc[:,2]
 
 
 rf.fit(xa, ya)
@@ -89,11 +89,11 @@ print("MSE:", metrics.mean_squared_error(yb, p))
 # #移动平均
 dfRoll = bsTrans.dataFrameRoll(df, freq, diffCol)
 # xa1, xb1, ya1, yb1 = bsTrans.dataPartition(dfRoll, yCol)
-xa1 = dfRoll.iloc[:, [0,1,2,3]]
-ya1 = dfRoll.iloc[:,4]
+xa1 = dfRoll.iloc[:, [0,1]]#,2,3]]
+ya1 = dfRoll.iloc[:,2]
 dfRoll_pre = bsTrans.dataFrameRoll(df1, freq, diffCol)
-xb1 = dfRoll_pre.iloc[:, [0,1,2,3]]
-yb1 = dfRoll_pre.iloc[:,4]
+xb1 = dfRoll_pre.iloc[:, [0,1]]#,2,3]]
+yb1 = dfRoll_pre.iloc[:,2]
 rf.fit(xa1, ya1)
 p1 = rf.predict(xb1)
 print("MSE-roll:", metrics.mean_squared_error(yb1, p1))
