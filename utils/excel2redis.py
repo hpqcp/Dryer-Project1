@@ -44,9 +44,9 @@ def fromCsv():
                 data[12], data[13], data[14])
 
 
-def getBatchData(_patten):
-    pool = redis.ConnectionPool(host='127.0.0.1', decode_responses=True)
-    r = redis.Redis(connection_pool=pool, decode_responses=True)
+def getBatchData(_patten,_db):
+    pool = redis.ConnectionPool(host='127.0.0.1', decode_responses=True,db=_db)
+    r = redis.Redis(connection_pool=pool, decode_responses=True,db=_db)
     key1 = r.keys(pattern=_patten)  # "t1zc0000*")
     dt = DataFrame([r.lrange(key1[i], 0, -1) for i in range(1, len(key1), 1)][:])
     dt1 = dt.sort_values(0)
@@ -58,4 +58,4 @@ def getBatchData(_patten):
     return dt2
 
 
-fromCsv()
+
