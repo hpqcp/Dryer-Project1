@@ -2,6 +2,7 @@ import pandas as pd
 import pymssql
 from sqlalchemy import create_engine
 
+
 class SqlHelp:
     def __init__(self,host,port,user,password,db):
         self.host = host

@@ -44,3 +44,35 @@ def isContainMissValue(_df):
 '''
 def FillMissValue(_df):
     return 0
+
+'''
+'''
+def compute_ChangePoint(_series,_mode="first"):
+    minList = computeIndex(_series).values[:,2]
+    if _mode == "first" :
+        minIndexList =  [_series[_series[i] == minList[i]].index.values[0] for i in range(0, _series.shape[1], 1)][:]
+    else:
+        minIndexList = [_series[_series[i] == minList[i]].index.values[-1] for i in range(0, _series.shape[1], 1)][:]
+    # minIndexList = _series[_series[0] == minList[0]].index.values[-1]
+    return  minIndexList
+    # return  _series
+    # return [_series[_series[i]>minList[2]][i]  for i in range(1, len(_series) - 1, 1)][:]
+    # print(minList[0])
+    # return _series[_series[0]>minList[0] and _series[0].index ][0]
+
+'''
+'''
+def wave_peakTrough(_series):
+    minList = computeIndex(_series).values[:, 2]
+    min1 = [_series[_series[i] == minList[i]].index.values[1] for i in range(0, _series.shape[1], 1)][:]
+    min2 = [_series[_series[i] == minList[i]].index.values[-1] for i in range(0, _series.shape[1], 1)][:]
+    #从最小点往前
+
+
+    max1 = [_series[_series[i] ==max(_series[i])].index.values[-1] for i in range(0, _series.shape[1], 1)][:]
+    max2 = [_series[_series[i] == max(_series[i])].index.values[0] for i in range(0, _series.shape[1], 1)][:]
+
+
+    # _series[_series[i] == ]
+    # print(max0,max1)
+    return minIndex
