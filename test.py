@@ -1,3 +1,4 @@
+import base.timeseries_process as ts
 import utils.excel2redis as rds
 import base.data_preProcess as bsPre
 import base.data_transform as bsTrans
@@ -17,10 +18,12 @@ rf = RandomForestRegressor()
 # path = "z://C线10批数据（20190315）.xlsx"
 # df = bsPre.readExcel(path)
 
+batchStr = "b-YAR-19033103103*"
 # df = rds.getBatchData("b-YAR-19033103103*",1)
-df = rds.getBatchDataDelay("b-YAR-19033102503*",15,15,1)
-# useCol = [1,2,3,4,5,6,7,8,9,10,11,12]
-useCol = [6,7,8,9,10,11,12]
+df = rds.getBatchDataDelay(batchStr,0,0,1)
+ts_not_cont = ts.check_ts_continuity(pd.Series(df[0].values, index=df.index.values))
+useCol = [1,2,3,4,5,6,7,8,9,10,11,12]
+# useCol = [6,7,8,9,10,11,12]
 useColName=["排潮开度实际值","出口水分实"
                       "际值","入口电子秤累计流量","入口水分实际值","出口水分设定值",\
            "热风蒸汽流量实际值","主蒸汽压力","滚筒转速","热风温度实际值","筒壁温度实际值","出口温度实际值","热风风门开度"]
@@ -31,8 +34,9 @@ yCol = 5
 freq = 1
 # print(df.values[:2,0])
 # print(bsPre.computeIndex(df))
-df = df[80:300]#df.shape[0]/2]
-cp.singlePlot(df,_name=useColName)
+df = df[:]#df.shape[0]/2]
+
+cp.singlePlot(df,_name=useColName,_title=batchStr)
     # rtn=bsPre.compute_ChangePoint(df,_mode="last")
     # print(rtn)
     # print(rtn[6]-rtn[0],rtn[8]-rtn[6])
@@ -58,7 +62,7 @@ cp.singlePlot(df,_name=useColName)
 #     elif(y[i]==2):
 #         plt.plot(df.values[i,0],"pb")
 # plt.show()
-# exit()
+exit()
 
 #原始
 xa,xb,ya,yb = bsTrans.dataPartition(df.iloc[:,diffCol],yCol)
