@@ -12,6 +12,8 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn import metrics
 from sklearn.cluster import KMeans
 import base.timeseries_process as tim
+
+
 rf = RandomForestRegressor()
 # # 绘制数据集
 # path = "z://C线10批数据（20190315）.xlsx"

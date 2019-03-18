@@ -50,7 +50,7 @@ def FillMissValue(_df):
 def compute_ChangePoint(_series,_mode="first"):
     minList = computeIndex(_series).values[:,2]
     if _mode == "first" :
-        minIndexList =  [_series[_series[i] == minList[i]].index.values[0] for i in range(0, _series.shape[1], 1)][:]
+        minIndexList = [_series[_series[i] == minList[i]].index.values[0] for i in range(0, _series.shape[1], 1)][:]
     else:
         minIndexList = [_series[_series[i] == minList[i]].index.values[-1] for i in range(0, _series.shape[1], 1)][:]
     # minIndexList = _series[_series[0] == minList[0]].index.values[-1]
