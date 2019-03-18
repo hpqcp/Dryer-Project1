@@ -1,7 +1,10 @@
+import utils.excel2redis as rds
 import base.data_preProcess as bsPre
 import  base.data_transform as bsTrans
+import  base.change_point as bsCp
 import  chart.plot as cp
 from pandas import DataFrame
+import  pandas as pd
 import numpy as  np
 import matplotlib.pyplot as pyplot
 from sklearn.model_selection import cross_val_score
@@ -10,30 +13,29 @@ from sklearn import metrics
 
 rf = RandomForestRegressor()
 # # 绘制数据集
-path = "D://C线10批数据（20190315）.xlsx"
-for i in range(0,9,1):
-    df = bsPre.readExcel(path, i)
-    useCol = [1,3,5,7,9,11,13,15,17]
-    #df = DataFrame(bsTrans.diff(df.values[:,useCol]))
-    df = DataFrame(df.values[:,useCol])
-    diffCol = [0,1,2,3,4,5,6]
-    yCol = 6
-    freq = 6
+# path = "z://C线10批数据（20190315）.xlsx"
+# df = bsPre.readExcel(path)
 
-    #画图
-    # pyplot.plot(df.values[:,[6]])
-    # pyplot.show()
-    # exit()
-    df = df[:]
+df = rds.getBatchData("t1zc0000*")
 
-    # print(df)
+useCol = [1,2,3,4,5,6,7,8,9]
+#df = DataFrame(bsTrans.diff(df.values[:,useCol]))
+df = DataFrame(df.values[:,useCol])
+# diffCol = [0,1,2,3,4,5,6]
+yCol = 6
+freq = 6
 
-    # print(bsPre.computeIndex(df))
-    df = df[800:int(len(df)/2)-1500]
-    cp.singlePlot(df)
-    rtn=bsPre.compute_ChangePoint(df,_mode="last")
-    print(rtn)
-    print(rtn[6]-rtn[0],rtn[8]-rtn[6])
+print(bsPre.computeIndex(df))
+df = df[:]#int(len(df)/2)]
+cp.singlePlot(df)
+    # rtn=bsPre.compute_ChangePoint(df,_mode="last")
+    # print(rtn)
+    # print(rtn[6]-rtn[0],rtn[8]-rtn[6])
+    # print(bsPre.wave_peakTrough(df))
+# cp1=bsCp.Pettitt_change_point_detection(df.values[:,0])
+# cp2=bsCp.Kendall_change_point_detection(df.values[:,0])
+# print(cp1,cp2)
+# print(df.values[cp2,0])
 exit()
 
 #原始

@@ -17,7 +17,7 @@ class WebSocketHelp:
             df = pd.DataFrame(data, columns=['TagName', 'DateTime', 'Value'])
             return df
         else:
-            return None     
+            return None
 
 if __name__ == "__main__":
     df = WebSocketHelp.WebSocketJson("ws://10.130.65.207:8181/HisWeb","MES2RTDATA.U_Enriche_11010030005.DC_PH||2018-01-01 00:00:00||2018-01-01 01:00:00||Cyclic||6000")
