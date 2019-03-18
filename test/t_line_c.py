@@ -39,12 +39,14 @@ def MergeBatch(_batchList,_db):
         # indexList=ts.check_ts_continuity(_series)
         df = DataFrame(df.values[:, useCol])
         df = bsTrans.data_alignment(df, putTimes)
+        df = df[1500:5000]
         dfAll = dfAll.append(df)
+        print(dfAll.shape[0])
     dfAll = dfAll.reset_index(drop=True)
     return dfAll
 
 
-batchList = ["t1zc0000*", "t1zc0001*", "t1zc0002*", "t1zc0003*", "t1zc0004*"]
+batchList = ["t1zc0008*", "t1zc0001*", "t1zc0002*", "t1zc0003*", "t1zc0004*","t1zc0005*" ,"t1zc0006*","t1zc0007*","t1zc0009*"]
 allDf = MergeBatch(batchList,0)
 
 
@@ -69,16 +71,33 @@ batchStr = ""
 cPlt.singlePlot(df, _title=batchStr)
 df = df[:]  # int(len(df) / 4)]
 # 原始
-xa, xb, ya, yb = bsTrans.dataPartition(df.iloc[:, diffCol], yCol)
+# xa, xb, ya, yb = bsTrans.dataPartition(df.iloc[:, diffCol], yCol)
+xa = df.iloc[:, [0,1,2,3]]
+ya = df.iloc[:,4]
+df1 = rds.getBatchData("t1zc0000*", 0)
+df1 = DataFrame(df1.values[:, useCol])
+df1 = bsTrans.data_alignment(df1, putTimes)
+df1 = df1[1500:5000]
+xb = df1.iloc[:, [0,1,2,3]]
+yb = df1.iloc[:,4]
+
+
 rf.fit(xa, ya)
 p = rf.predict(xb)
 print("MSE:", metrics.mean_squared_error(yb, p))
+
 # #移动平均
 dfRoll = bsTrans.dataFrameRoll(df, freq, diffCol)
-xa1, xb1, ya1, yb1 = bsTrans.dataPartition(dfRoll, yCol)
+# xa1, xb1, ya1, yb1 = bsTrans.dataPartition(dfRoll, yCol)
+xa1 = dfRoll.iloc[:, [0,1,2,3]]
+ya1 = dfRoll.iloc[:,4]
+dfRoll_pre = bsTrans.dataFrameRoll(df1, freq, diffCol)
+xb1 = dfRoll_pre.iloc[:, [0,1,2,3]]
+yb1 = dfRoll_pre.iloc[:,4]
 rf.fit(xa1, ya1)
 p1 = rf.predict(xb1)
 print("MSE-roll:", metrics.mean_squared_error(yb1, p1))
+
 # 分段平均
 dfSplite = DataFrame(bsTrans.splitMean(df.values[:, diffCol], freq))
 xa2, xb2, ya2, yb2 = bsTrans.dataPartition(dfSplite, yCol)
