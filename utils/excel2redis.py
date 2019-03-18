@@ -22,6 +22,28 @@ import base.data_preProcess as bsPre
 #         r.rpush(key,data[0],data[1],data[2],data[3],data[4],data[5],data[6],data[7],data[8],data[9])
 # exit()
 
+
+
+def fromCsv():
+    pool = redis.ConnectionPool(host='127.0.0.1', decode_responses=True)
+    r = redis.Redis(connection_pool=pool, decode_responses=True,db=1)
+    path = "d://hsj1.xlsx"
+    group = "b"  # t test data
+    factoryID="9" # 1Ky 2 hy 3qy
+    deptID = "z" # z zs j jb c cx
+    lineID = "a" # line C
+    #batch = "0001"
+    #secID = 3 # 3 yslq 4 hs 5 yslq
+    df = bsPre.readExcel(path, 0)
+    df = df[2853:]
+    df=df.reset_index(drop=True)
+    # print(df.values[0,:])
+    for j in range(0,df.shape[0],1):
+        data = df.values[j,:].tolist()
+        key = group+str(data[1])+str(data[0])+str(data[3])
+        r.rpush(key,data[2],data[3],data[4],data[5],data[6],data[7],data[8],data[9],data[10],data[11],data[12],data[13],data[14])
+
+
 def getBatchData(_patten):
     pool = redis.ConnectionPool(host='127.0.0.1',decode_responses=True)
     r = redis.Redis(connection_pool=pool,decode_responses=True)
@@ -36,3 +58,4 @@ def getBatchData(_patten):
     return dt2
 
 
+fromCsv()
