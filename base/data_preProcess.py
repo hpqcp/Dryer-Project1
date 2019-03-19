@@ -76,3 +76,6 @@ def wave_peakTrough(_series):
     # _series[_series[i] == ]
     # print(max0,max1)
     return minIndex
+
+
+

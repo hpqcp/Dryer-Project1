@@ -26,7 +26,7 @@ import datetime
 def fromCsv():
     pool = redis.ConnectionPool(host='127.0.0.1', decode_responses=True, db=1)
     r = redis.Redis(connection_pool=pool, decode_responses=True, db=1)
-    path = "d://hsj1.xlsx"
+    path = "d://hsj时间格式.xlsx"
     group = "b"  # t test data
     factoryID = "9"  # 1Ky 2 hy 3qy
     deptID = "z"  # z zs j jb c cx
@@ -34,8 +34,8 @@ def fromCsv():
     # batch = "0001"
     # secID = 3 # 3 yslq 4 hs 5 yslq
     df = bsPre.readExcel(path, 0)
-    df = df[2853:]
-    df = df.reset_index(drop=True)
+    # df = df[2853:]
+    # df = df.reset_index(drop=True)
     # print(df.values[0,:])
     for j in range(0, df.shape[0], 1):
         data = df.values[j, :].tolist()
@@ -57,14 +57,14 @@ def getBatchData(_patten,_db):
     r.connection_pool.disconnect()
     return dt2
 
-def getBatchDataDelay(_db,startDelay,endDelay):
+def getBatchDataDelay(_patten,startDelay,endDelay,_db):
     #获取批次数据
-    df1 = getBatchData("bYAR19033102903*",_db)
+    df1 = getBatchData(_patten,_db)
     #获取开始结束时间
-    startTime =df1[0][0]
-    endTime = df1[0][len(df1)-1]
+    startTime =df1.values[0,0]
+    endTime = df1.values[-1,0]
     #获取所有数据
-    df2 = getBatchData("bYAR*", _db)
+    df2 = getBatchData("b*", _db)
     #截取时间段之间的数据
     startdf = df2[df2[0].isin({startTime})]
     enddf = df2[df2[0].isin({endTime})]
@@ -83,5 +83,4 @@ def getBatchDataDelay(_db,startDelay,endDelay):
     df2=df2[startIndex:endIndex]
     return df2
 
-getBatchDataDelay(1,100,100)
 
