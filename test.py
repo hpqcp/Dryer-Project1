@@ -17,8 +17,8 @@ rf = RandomForestRegressor()
 # path = "z://C线10批数据（20190315）.xlsx"
 # df = bsPre.readExcel(path)
 
-df = rds.getBatchData("b-YAR-19033103103*",1)
-
+# df = rds.getBatchData("b-YAR-19033103103*",1)
+df = rds.getBatchDataDelay("b-YAR-19033102503*",15,15,1)
 useCol = [1,2,3,4,5,6,7,8,9,10,11,12]
 #df = DataFrame(bsTrans.diff(df.values[:,useCol]))
 df = DataFrame(df.values[:,useCol])
