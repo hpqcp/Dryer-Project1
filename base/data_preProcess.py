@@ -76,3 +76,9 @@ def wave_peakTrough(_series):
     # _series[_series[i] == ]
     # print(max0,max1)
     return minIndex
+
+
+'''
+'''
+def check_ts_continuity(_series):
+    # min1 = [if datetime.datetime.strptime(_series[i], '%Y-%m-%d %H:%M:%S')  for i in range(1, len(_series), 1)]
