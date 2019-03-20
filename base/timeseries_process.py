@@ -2,7 +2,7 @@ import utils.excel2redis as res
 import pandas as pd
 import datetime
 
-
+#获取时间列不连续的索引
 def check_ts_continuity(_series):
     _series = pd.to_datetime(_series)
     list = []
@@ -14,8 +14,8 @@ def check_ts_continuity(_series):
     #     seconds=15)] for i in range(1, len(_series), 1)]
     return list
 
-df = res.getBatchData("b-YAR-19033103103*", 2)
-_series = pd.Series(df[0].values, index=df.index.values)
-list =check_ts_continuity(_series)
-
-print()
+# df = res.getBatchData("b-YAR-19033103103*", 2)
+# _series = pd.Series(df[0].values, index=df.index.values)
+# list =check_ts_continuity(_series)
+#
+# print()

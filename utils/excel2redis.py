@@ -69,7 +69,7 @@ def getBatchDataDelay(_patten,startDelay,endDelay,_db):
     startdf = df2[df2[0].isin({startTime})]
     enddf = df2[df2[0].isin({endTime})]
 
-    startIndex=startdf.index.values[0]
+    startIndex = startdf.index.values[0]
     endIndex = enddf.index.values[0]
 
     startIndex = startIndex - startDelay
@@ -81,6 +81,6 @@ def getBatchDataDelay(_patten,startDelay,endDelay,_db):
 
 
     df2=df2[startIndex:endIndex]
+    df2 = df2.reset_index(drop=True)
     return df2
-
 
