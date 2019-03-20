@@ -3,6 +3,8 @@ from pandas import DataFrame
 import base.data_preProcess as bsPre
 import datetime
 
+
+
 # pool = redis.ConnectionPool(host='127.0.0.1')
 # r = redis.Redis(connection_pool=pool)
 
@@ -39,14 +41,14 @@ def fromCsv():
     # print(df.values[0,:])
     for j in range(0, df.shape[0], 1):
         data = df.values[j, :].tolist()
-        key = group +"-" + str(data[1]) +"-" +str(data[0]) +"-" + str(data[2])
+        key = group + "-" + str(data[1]) + "-" + str(data[0]) + "-" + str(data[2])
         r.rpush(key, data[2], data[3], data[4], data[5], data[6], data[7], data[8], data[9], data[10], data[11],
                 data[12], data[13], data[14])
 
 
-def getBatchData(_patten,_db):
-    pool = redis.ConnectionPool(host='127.0.0.1', decode_responses=True,db=_db)
-    r = redis.Redis(connection_pool=pool, decode_responses=True,db=_db)
+def getBatchData(_patten, _db):
+    pool = redis.ConnectionPool(host='127.0.0.1', decode_responses=True, db=_db)
+    r = redis.Redis(connection_pool=pool, decode_responses=True, db=_db)
     key1 = r.keys(pattern=_patten)  # "t1zc0000*")
     dt = DataFrame([r.lrange(key1[i], 0, -1) for i in range(1, len(key1), 1)][:])
     dt1 = dt.sort_values(0)
@@ -57,15 +59,16 @@ def getBatchData(_patten,_db):
     r.connection_pool.disconnect()
     return dt2
 
-def getBatchDataDelay(_patten,startDelay,endDelay,_db):
-    #获取批次数据
-    df1 = getBatchData(_patten,_db)
-    #获取开始结束时间
-    startTime =df1.values[0,0]
-    endTime = df1.values[-1,0]
-    #获取所有数据
+
+def getBatchDataDelay(_patten, startDelay, endDelay, _db):
+    # 获取批次数据
+    df1 = getBatchData(_patten, _db)
+    # 获取开始结束时间
+    startTime = df1.values[0, 0]
+    endTime = df1.values[-1, 0]
+    # 获取所有数据
     df2 = getBatchData("b*", _db)
-    #截取时间段之间的数据
+    # 截取时间段之间的数据
     startdf = df2[df2[0].isin({startTime})]
     enddf = df2[df2[0].isin({endTime})]
 
@@ -74,11 +77,10 @@ def getBatchDataDelay(_patten,startDelay,endDelay,_db):
 
     startIndex = startIndex - startDelay
     endIndex = endIndex + endDelay
-    if(startIndex<0):
+    if (startIndex < 0):
         startIndex = 0
-    if(endIndex>len(df2)-1):
-        endIndex = len(df2)-1
-    df2=df2[startIndex:endIndex]
+    if (endIndex > len(df2) - 1):
+        endIndex = len(df2) - 1
+    df2 = df2[(df2.index.values>=startIndex)&(df2.index.values<=endIndex)]
     df2 = df2.reset_index(drop=True)
     return df2
-
