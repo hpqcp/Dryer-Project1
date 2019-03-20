@@ -78,8 +78,6 @@ def getBatchDataDelay(_patten,startDelay,endDelay,_db):
         startIndex = 0
     if(endIndex>len(df2)-1):
         endIndex = len(df2)-1
-
-
     df2=df2[startIndex:endIndex]
     df2 = df2.reset_index(drop=True)
     return df2
