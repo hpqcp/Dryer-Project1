@@ -98,6 +98,7 @@ def isSameBatch_Series(_series, _seriesDelay):
 # series = pd.Series(df[0].values, index = df.index.values)
 # series2 = pd.Series(df2[0].values, index = df2.index.values)
 # print(isSameBatch_Series(series, series2))
+
 # str = "b-YAR-19033102403-*"
 # df = rds.getBatchData(str, 1)
 # df2 = rds.getBatchDataDelay(str, 15, 0, 1)
