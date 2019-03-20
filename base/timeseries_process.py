@@ -57,7 +57,7 @@ def isSameBatch(_df, _delayDf):
 
     return [startflag, endflag]
 
-str = "b-YAR-19033102403-*"
-df = rds.getBatchData(str, 1)
-df2 = rds.getBatchDataDelay(str, 15, 0, 1)
-print(isSameBatch(df, df2))
+# str = "b-YAR-19033102403-*"
+# df = rds.getBatchData(str, 1)
+# df2 = rds.getBatchDataDelay(str, 15, 0, 1)
+# print(isSameBatch(df, df2))
