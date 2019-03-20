@@ -14,8 +14,8 @@ def check_ts_continuity(_series):
     #     seconds=15)] for i in range(1, len(_series), 1)]
     return list
 
-# df = res.getBatchData("b-YAR-19033103103*", 2)
+# df = res.getBatchData("b-YAR-19033103103*", 1)
 # _series = pd.Series(df[0].values, index=df.index.values)
 # list =check_ts_continuity(_series)
 #
-# print()
+# print(list)

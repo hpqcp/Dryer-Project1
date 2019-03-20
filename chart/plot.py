@@ -18,11 +18,12 @@ def pairPlot(_df,_name=[],_ylim=[]):
     pyplot.show()
     return 0
 
-def singlePlot(_df,_name=[],_ylim=[]):
+def singlePlot(_df,_name=[],_ylim=[],_title=""):
     colNum = _df.shape[1]
     if colNum<1 :
         return -1
     pyplot.figure()
+    pyplot.suptitle(_title)
     for i in range(0,colNum ,1):
         pyplot.subplot(int(colNum), 1, i+1)
         pyplot.plot(_df.iloc[:,i])
@@ -30,5 +31,6 @@ def singlePlot(_df,_name=[],_ylim=[]):
             pyplot.title(_name[i], y=1, loc='right')
         if _ylim :
             pyplot.ylim(_ylim)
+
     pyplot.show()
     return 0
