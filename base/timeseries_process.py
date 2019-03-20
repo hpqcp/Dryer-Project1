@@ -57,6 +57,47 @@ def isSameBatch(_df, _delayDf):
 
     return [startflag, endflag]
 
+def isSameBatch_Series(_series, _seriesDelay):
+    # 获取开始结束时间
+    startTime = _series.values[0]
+    endTime = _series.values[-1]
+
+    startSe = _seriesDelay[_seriesDelay.isin({startTime})]
+    endSe = _seriesDelay[_seriesDelay.isin({endTime})]
+
+    startIndex = startSe.index.values[0]
+    endIndex = endSe.index.values[0]
+
+    outStarDf = _seriesDelay[_seriesDelay.index.values <= startIndex]
+    outEndDf = _seriesDelay[_seriesDelay.index.values >= endIndex]
+
+    outStarDf = outStarDf.reset_index(drop=True)
+    outEndDf = outEndDf.reset_index(drop=True)
+
+    startSeries = outStarDf
+    endSeries = outEndDf
+
+    startflag = True
+    endflag = True
+    if (len(startSeries) > 1):
+        startList = check_ts_continuity(startSeries)
+        if (len(startList) > 0):
+            startflag = False
+
+    if (len(endSeries) > 1):
+        endList = check_ts_continuity(endSeries)
+        if (len(endList) > 0):
+            endflag = False
+
+    return [startflag, endflag]
+
+
+# str = "b-YAR-19033102403-*"
+# df = rds.getBatchData(str, 1)
+# df2 = rds.getBatchDataDelay(str, 15, 15, 1)
+# series = pd.Series(df[0].values, index = df.index.values)
+# series2 = pd.Series(df2[0].values, index = df2.index.values)
+# print(isSameBatch_Series(series, series2))
 # str = "b-YAR-19033102403-*"
 # df = rds.getBatchData(str, 1)
 # df2 = rds.getBatchDataDelay(str, 15, 0, 1)

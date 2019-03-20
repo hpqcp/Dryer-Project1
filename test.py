@@ -11,7 +11,7 @@ from sklearn.model_selection import cross_val_score
 from sklearn.ensemble import RandomForestRegressor
 from sklearn import metrics
 from sklearn.cluster import KMeans
-import base.timeseries_process as ts
+import base.timeseries_process as tim
 rf = RandomForestRegressor()
 # # 绘制数据集
 # path = "z://C线10批数据（20190315）.xlsx"
@@ -21,13 +21,10 @@ rf = RandomForestRegressor()
 str="b-YAR-19033103303-*"
 df = rds.getBatchDataDelay(str,0,0,1)
 #df2 = rds.getBatchData(str,1)
-df_delay = rds.getBatchDataDelay(str,15,15,1)
-isContinue = ts.isSameBatch(df, df_delay)
-print(isContinue)
+_series = pd.Series(df[0].values, index = df.index.values)
+indexList=tim.check_ts_continuity(_series)
 #if(len(indexList)<0):
 #df.to_excel("19033103103.xlsx")
-useColName=["排潮开度实际值","出口水分实际值","入口电子秤累计流量","入口水分实际值","出口水分设定值",\
-           "热风蒸汽流量实际值","主蒸汽压力","滚筒转速","热风温度实际值","筒壁温度实际值","出口温度实际值","热风风门开度"]
 useCol = [1,2,3,4,5,6,7,8,9,10,11,12]
 #df = DataFrame(bsTrans.diff(df.values[:,useCol]))
 df = DataFrame(df.values[:,useCol])
@@ -37,7 +34,7 @@ freq = 6
 # print(df.values[:2,0])
 # print(bsPre.computeIndex(df))
 df = df[:]#int(len(df)/2)]
-cp.singlePlot(df,_name=useColName,_title=str)
+cp.singlePlot(df)
     # rtn=bsPre.compute_ChangePoint(df,_mode="last")
     # print(rtn)
     # print(rtn[6]-rtn[0],rtn[8]-rtn[6])
