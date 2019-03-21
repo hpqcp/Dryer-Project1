@@ -28,6 +28,9 @@ indexList=tim.check_ts_continuity(_series)
 #if(len(indexList)<0):
 #df.to_excel("19033103103.xlsx")
 useCol = [1,2,3,4,5,6,7,8,9,10,11,12]
+useColName=["排潮开度实际值","出口水分实"
+                      "际值","入口电子秤累计流量","入口水分实际值","出口水分设定值",\
+           "热风蒸汽流量实际值","主蒸汽压力","滚筒转速","热风温度实际值","筒壁温度实际值","出口温度实际值","热风风门开度"]
 #df = DataFrame(bsTrans.diff(df.values[:,useCol]))
 df = DataFrame(df.values[:,useCol])
 # diffCol = [0,1,2,3,4,5,6]
@@ -36,7 +39,8 @@ freq = 6
 # print(df.values[:2,0])
 # print(bsPre.computeIndex(df))
 df = df[:]#int(len(df)/2)]
-cp.singlePlot(df)
+# cp.singlePlot(df)
+cp.singlePlot(df,_name=useColName,_title=str)
     # rtn=bsPre.compute_ChangePoint(df,_mode="last")
     # print(rtn)
     # print(rtn[6]-rtn[0],rtn[8]-rtn[6])
