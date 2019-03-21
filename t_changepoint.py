@@ -30,7 +30,7 @@ def kmeans_building(x1,x2,types_num,types,colors,shapes):
 
 
 #批次
-batchStr = "b-YAR-19033103203-*"
+batchStr = "b-YAR-19033102703-*"
 #获取批次数据
 df = rds.getBatchData(batchStr,1)
 # #获取时间列
@@ -73,5 +73,6 @@ kmeans_model,x1_result,x2_result=kmeans_building(x1, x2, 3, labels, colors, shap
 # print(kmeans_model)
 # print(x1_result)
 # print(x2_result)
-for i in range(0,len(x2_result),1):
-    print(x2_result[i][-1] - x2_result[i][0])
+diff = [x2_result[i][-1] - x2_result[i][0]for i in range(0,len(x2_result),1)]
+maxIndex = diff.index(max(diff)) #最大值index
+# x1 = pd.Series(_df.values[:, i]).rolling(_freq).mean
