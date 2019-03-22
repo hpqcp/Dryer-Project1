@@ -32,7 +32,7 @@ def kmeans_building(x1, x2, types_num, types, colors, shapes):
     plt.show()
     return kmeans_model, x1_result, x2_result
 
-
+# 按照移动极差大于固定值获取范围
 def getDifferenceList(_df, _stdGCount,_stdMax, _isPlot=False):
     df = _df
     plt.figure(figsize=(8, 6))
@@ -89,7 +89,8 @@ def getDifferenceList(_df, _stdGCount,_stdMax, _isPlot=False):
         # cPlt.singlePlot(result_series.to_frame(name=None), _name="", _title="")
     return result_list
 
-def getDifferenceList_aut(_df, _stdGCount, _isPlot=False):
+# 按照移动极差大于总极差百分比获取范围
+def getDifferenceList_aut(_df, _stdGCount,_per ,_isPlot=False):
     df = _df
     plt.figure(figsize=(8, 6))
     x1 = df.index  # x坐标列表
@@ -113,7 +114,7 @@ def getDifferenceList_aut(_df, _stdGCount, _isPlot=False):
         Difference_min = DifferenceSeries.rolling(_stdGCount).min()
         Difference_std = Difference_max.sub(Difference_min)
 
-        _stdMax = (DifferenceSeries.max() - DifferenceSeries.min()) * 0.07
+        _stdMax = (DifferenceSeries.max() - DifferenceSeries.min()) * _per
 
         Difference_std_sort = Difference_std.sort_values(ascending=False)
         Difference_std_top = Difference_std_sort[Difference_std_sort.values > _stdMax]
@@ -145,6 +146,7 @@ def getDifferenceList_aut(_df, _stdGCount, _isPlot=False):
         # cPlt.singlePlot(result_series.to_frame(name=None), _name="", _title="")
     return result_list
 
+# 按照移动极差topN 获取范围
 # df 批次数据 _stdGCount 移动极差样本数 _stdTop 极差topN
 def getDifferenceList_Top(_df, _stdGCount, _stdTop, _isPlot=False):
     df = _df
@@ -239,5 +241,5 @@ df = df[:int(len(df) / 2)]
 # df 批次数据 _stdGCount 移动极差样本数 _stdTop 极差topN
 # cp1 = getDifferenceList_Top(df, 5, 21)
 # cp1 = getDifferenceList(df, 5,1)
-cp1 = getDifferenceList_aut(df, 5)
+cp1 = getDifferenceList_aut(df, 5,0.07)
 print(cp1)
