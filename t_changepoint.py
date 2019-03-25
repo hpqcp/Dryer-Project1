@@ -162,7 +162,7 @@ def getDifferenceList_aut(_df, _stdGCount, _per, _isPlot=False):
 
 # 按照移动极差topN 获取范围
 # df 批次数据 _stdGCount 移动极差样本数 _stdTop 极差topN
-def getDifferenceList_Top(_df, _stdGCount, _stdTop, _isPlot=False):
+def getDifferenceList_Top(_df, _stdGCount, _stdTop, _mode = "up",_isPlot=False):
     df = _df
     plt.figure(figsize=(8, 6))
     x1 = df.index  # x坐标列表
@@ -248,15 +248,15 @@ def getHeadOrTail(_series, _type):
 
 
 # 批次
-batchStr = "b-YAR-19033102803-*"
+batchStr = "t1zc0001*"
 # 获取批次数据
-df = rds.getBatchData(batchStr, 1)
+df = rds.getBatchData(batchStr, 0)
 # #获取时间列
 # _series = pd.Series(df[0].values, index = df.index.values)
 # 获取数据是否连续
 # indexList=ts.check_ts_continuity(_series)
 # 定义使用的列
-useCol = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+useCol = [1,9]#, 10, 11, 12]
 df = DataFrame(df.values[:, useCol])
 # diffCol = [0,1,2,3,4,5,6]
 # 目标列Y
@@ -272,5 +272,5 @@ cPlt.singlePlot(df, _title=batchStr)
 # cp1 = getDifferenceList_Top(df, 5, 21)
 # cp1 = getDifferenceList(df, 5,1)
 # dt = DataFrame(df[[1]])
-cp1 = getDifferenceList_Top(df, 5, 4, _isPlot=True)
+cp1 = getDifferenceList_Top(df, 10, 5, _isPlot=True)
 # print(cp1)
