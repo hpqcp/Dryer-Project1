@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 from sklearn.cluster import KMeans
 
 
-def kmeans_building(x1, x2, types_num, types, colors, shapes):
+def kmeans_building(x1, x2, types_num, types, colors, shapes, _isPlot=False):
     X = np.array(list(zip(x1, x2))).reshape(len(x1), 2)
     kmeans_model = KMeans(n_clusters=types_num).fit(X)  # 设置聚类数n_clusters的值为types_num
     # 整理分类好的原始数据, 并画出聚类图
@@ -28,12 +28,14 @@ def kmeans_building(x1, x2, types_num, types, colors, shapes):
     for i in range(len(list(kmeans_model.cluster_centers_))):  # 画聚类中心点
         plt.scatter(list(list(kmeans_model.cluster_centers_)[i])[0], list(list(kmeans_model.cluster_centers_)[i])[1],
                     c=colors[i], marker=shapes[i], label=types[i])
-    plt.legend()
-    plt.show()
+    if (_isPlot == True):
+        plt.legend()
+        plt.show()
     return kmeans_model, x1_result, x2_result
 
+
 # 按照移动极差大于固定值获取范围
-def getDifferenceList(_df, _stdGCount,_stdMax, _isPlot=False):
+def getDifferenceList(_df, _stdGCount, _stdMax, _isPlot=False):
     df = _df
     plt.figure(figsize=(8, 6))
     x1 = df.index  # x坐标列表
@@ -43,7 +45,8 @@ def getDifferenceList(_df, _stdGCount,_stdMax, _isPlot=False):
         colors = ['b', 'g', 'r']  # 颜色列表，因为要分3类，所以该列表有3个元素
         shapes = ['o', 's', 'D']  # 点的形状列表，因为要分3类，所以该列表有3个元素
         labels = ['A', 'B', 'C']  # 画图的标签内容，A, B, C分别表示三个类的名称
-        kmeans_model, x1_result, x2_result = kmeans_building(x1, x2, 3, labels, colors, shapes)  # 本例要分3类，所以传入一个3
+        kmeans_model, x1_result, x2_result = kmeans_building(x1, x2, 3, labels, colors, shapes,
+                                                             _isPlot)  # 本例要分3类，所以传入一个3
         diff = [abs(x2_result[i][-1] - x2_result[i][0]) for i in range(0, len(x2_result), 1)]
         maxIndex = diff.index(max(diff))  # 最大值index
         DifferenceList_x1 = x1_result[maxIndex]
@@ -83,14 +86,16 @@ def getDifferenceList(_df, _stdGCount,_stdMax, _isPlot=False):
         result_series = DifferenceSeries[(DifferenceSeries.index.values >= Difference_std_topIndex[0]) & (
                 DifferenceSeries.index.values <= Difference_std_topIndex[-1])]
         result_list.append(result_series)
-        plt.scatter(result_series.index, result_series.values)
-        plt.legend()
-        plt.show()
+        if (_isPlot == True):
+            plt.scatter(result_series.index, result_series.values)
+            plt.legend()
+            plt.show()
         # cPlt.singlePlot(result_series.to_frame(name=None), _name="", _title="")
     return result_list
 
+
 # 按照移动极差大于总极差百分比获取范围
-def getDifferenceList_aut(_df, _stdGCount,_per ,_isPlot=False):
+def getDifferenceList_aut(_df, _stdGCount, _per, _isPlot=False):
     df = _df
     plt.figure(figsize=(8, 6))
     x1 = df.index  # x坐标列表
@@ -100,7 +105,8 @@ def getDifferenceList_aut(_df, _stdGCount,_per ,_isPlot=False):
         colors = ['b', 'g', 'r']  # 颜色列表，因为要分3类，所以该列表有3个元素
         shapes = ['o', 's', 'D']  # 点的形状列表，因为要分3类，所以该列表有3个元素
         labels = ['A', 'B', 'C']  # 画图的标签内容，A, B, C分别表示三个类的名称
-        kmeans_model, x1_result, x2_result = kmeans_building(x1, x2, 3, labels, colors, shapes)  # 本例要分3类，所以传入一个3
+        kmeans_model, x1_result, x2_result = kmeans_building(x1, x2, 3, labels, colors, shapes,
+                                                             _isPlot)  # 本例要分3类，所以传入一个3
         diff = [abs(x2_result[i][-1] - x2_result[i][0]) for i in range(0, len(x2_result), 1)]
         maxIndex = diff.index(max(diff))  # 最大值index
         DifferenceList_x1 = x1_result[maxIndex]
@@ -140,15 +146,17 @@ def getDifferenceList_aut(_df, _stdGCount,_per ,_isPlot=False):
         result_series = DifferenceSeries[(DifferenceSeries.index.values >= Difference_std_topIndex[0]) & (
                 DifferenceSeries.index.values <= Difference_std_topIndex[-1])]
         result_list.append(result_series)
-        plt.scatter(result_series.index, result_series.values)
-        plt.legend()
-        plt.show()
+        if (_isPlot == True):
+            plt.scatter(result_series.index, result_series.values)
+            plt.legend()
+            plt.show()
         # cPlt.singlePlot(result_series.to_frame(name=None), _name="", _title="")
     return result_list
 
+
 # 按照移动极差topN 获取范围
 # df 批次数据 _stdGCount 移动极差样本数 _stdTop 极差topN
-def getDifferenceList_Top(_df, _stdGCount, _stdTop, _mode = "last",_isPlot=False):
+def getDifferenceList_Top(_df, _stdGCount, _stdTop, _isPlot=False):
     df = _df
     plt.figure(figsize=(8, 6))
     x1 = df.index  # x坐标列表
@@ -159,7 +167,8 @@ def getDifferenceList_Top(_df, _stdGCount, _stdTop, _mode = "last",_isPlot=False
         colors = ['b', 'g', 'r']  # 颜色列表，因为要分3类，所以该列表有3个元素
         shapes = ['o', 's', 'D']  # 点的形状列表，因为要分3类，所以该列表有3个元素
         labels = ['A', 'B', 'C']  # 画图的标签内容，A, B, C分别表示三个类的名称
-        kmeans_model, x1_result, x2_result = kmeans_building(x1, x2, 3, labels, colors, shapes)  # 本例要分3类，所以传入一个3
+        kmeans_model, x1_result, x2_result = kmeans_building(x1, x2, 3, labels, colors, shapes,
+                                                             _isPlot)  # 本例要分3类，所以传入一个3
         diff = [abs(x2_result[i][-1] - x2_result[i][0]) for i in range(0, len(x2_result), 1)]
         maxIndex = diff.index(max(diff))  # 最大值index
         DifferenceList_x1 = x1_result[maxIndex]
@@ -206,15 +215,30 @@ def getDifferenceList_Top(_df, _stdGCount, _stdTop, _mode = "last",_isPlot=False
         # result_series = DifferenceSeries[
         #     (DifferenceSeries.index.values >= all_list[0]) & (DifferenceSeries.index.values <= all_list[-1])]
 
-        result_series = DifferenceSeries[(DifferenceSeries.index.values >= Difference_std_topIndex[0]) & (
-                DifferenceSeries.index.values <= Difference_std_topIndex[-1])]
+        result_series = DifferenceSeries[(DifferenceSeries.index.values >= all_list[0]) & (
+                DifferenceSeries.index.values <= all_list[-1])]
         result_list.append(result_series)
-        plt.scatter(result_series.index, result_series.values)
-        if (_isPlot == True) :
+        if (_isPlot == True):
+            plt.scatter(result_series.index, result_series.values)
             plt.legend()
             plt.show()
         # cPlt.singlePlot(result_series.to_frame(name=None), _name="", _title="")
+        vi = getHeadOrTail(result_series, "Last")
+        print(vi)
     return result_list
+
+
+# 获取最后一个最小值或第一最大值
+def getHeadOrTail(_series, _type):
+    if (_type == "Last"):
+        minV = min(_series.values)
+        min_series = _series[_series.values == minV]
+        return [min_series.values[-1], min_series.index.values[-1]]
+        print()
+    elif (_type == "First"):
+        maxV = max(_series.values)
+        max_series = _series[_series.values == maxV]
+        return [max_series.values[0], max_series.index.values[0]]
 
 
 # 批次
@@ -235,11 +259,11 @@ yCol = 6
 freq = 6
 df = df[:int(len(df) / 2)]
 # df = df[35:49]
-cPlt.singlePlot(df,_title=batchStr)
+# cPlt.singlePlot(df,_title=batchStr)
 # cp = bsPre.compute_ChangePoint(df, _mode="last")
 # print(cp)
 # df 批次数据 _stdGCount 移动极差样本数 _stdTop 极差topN
 # cp1 = getDifferenceList_Top(df, 5, 21)
 # cp1 = getDifferenceList(df, 5,1)
-cp1 = getDifferenceList_Top(df,5,3,_isPlot=True)
-print(cp1)
+cp1 = getDifferenceList_Top(df, 5, 3, False)
+# print(cp1)
