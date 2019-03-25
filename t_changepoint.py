@@ -242,7 +242,7 @@ def getHeadOrTail(_series, _type):
 
 
 # 批次
-batchStr = "b-YAR-19033102703-*"
+batchStr = "b-YAR-19033103203-*"
 # 获取批次数据
 df = rds.getBatchData(batchStr, 1)
 # #获取时间列
@@ -259,11 +259,12 @@ yCol = 6
 freq = 6
 df = df[:int(len(df) / 2)]
 # df = df[35:49]
-# cPlt.singlePlot(df,_title=batchStr)
+cPlt.singlePlot(df,_title=batchStr)
 # cp = bsPre.compute_ChangePoint(df, _mode="last")
 # print(cp)
 # df 批次数据 _stdGCount 移动极差样本数 _stdTop 极差topN
 # cp1 = getDifferenceList_Top(df, 5, 21)
 # cp1 = getDifferenceList(df, 5,1)
-cp1 = getDifferenceList_Top(df, 5, 3, False)
+dt = DataFrame(df[[1]])
+cp1 = getDifferenceList_Top(df, 10, 3, _isPlot=False)
 # print(cp1)
