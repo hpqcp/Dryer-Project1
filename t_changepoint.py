@@ -91,6 +91,9 @@ def getDifferenceList(_df, _stdGCount, _stdMax, _isPlot=False):
             plt.legend()
             plt.show()
         # cPlt.singlePlot(result_series.to_frame(name=None), _name="", _title="")
+        vi = getHeadOrTail(result_series, "Last")
+        print(vi)
+        # cPlt.singlePlot(result_series.to_frame(name=None), _name="", _title="")
     return result_list
 
 
@@ -150,6 +153,9 @@ def getDifferenceList_aut(_df, _stdGCount, _per, _isPlot=False):
             plt.scatter(result_series.index, result_series.values)
             plt.legend()
             plt.show()
+        # cPlt.singlePlot(result_series.to_frame(name=None), _name="", _title="")
+        vi = getHeadOrTail(result_series, "Last")
+        print(vi)
         # cPlt.singlePlot(result_series.to_frame(name=None), _name="", _title="")
     return result_list
 
@@ -242,7 +248,7 @@ def getHeadOrTail(_series, _type):
 
 
 # 批次
-batchStr = "b-YAR-19033103203-*"
+batchStr = "b-YAR-19033102803-*"
 # 获取批次数据
 df = rds.getBatchData(batchStr, 1)
 # #获取时间列
@@ -259,12 +265,12 @@ yCol = 6
 freq = 6
 df = df[:int(len(df) / 2)]
 # df = df[35:49]
-cPlt.singlePlot(df,_title=batchStr)
+cPlt.singlePlot(df, _title=batchStr)
 # cp = bsPre.compute_ChangePoint(df, _mode="last")
 # print(cp)
 # df 批次数据 _stdGCount 移动极差样本数 _stdTop 极差topN
 # cp1 = getDifferenceList_Top(df, 5, 21)
 # cp1 = getDifferenceList(df, 5,1)
-dt = DataFrame(df[[1]])
-cp1 = getDifferenceList_Top(df, 10, 3, _isPlot=False)
+# dt = DataFrame(df[[1]])
+cp1 = getDifferenceList_Top(df, 5, 4, _isPlot=True)
 # print(cp1)
