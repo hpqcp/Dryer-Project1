@@ -162,7 +162,7 @@ def getDifferenceList_aut(_df, _stdGCount, _per, _isPlot=False):
 
 # 按照移动极差topN 获取范围
 # df 批次数据 _stdGCount 移动极差样本数 _stdTop 极差topN
-def getDifferenceList_Top(_df, _stdGCount, _stdTop, _mode = "up",_isPlot=False):
+def getDifferenceList_Top(_df, _stdGCount, _stdTop, _mode="up", _isPlot=False):
     df = _df
     plt.figure(figsize=(8, 6))
     x1 = df.index  # x坐标列表
@@ -175,7 +175,12 @@ def getDifferenceList_Top(_df, _stdGCount, _stdTop, _mode = "up",_isPlot=False):
         labels = ['A', 'B', 'C']  # 画图的标签内容，A, B, C分别表示三个类的名称
         kmeans_model, x1_result, x2_result = kmeans_building(x1, x2, 3, labels, colors, shapes,
                                                              _isPlot)  # 本例要分3类，所以传入一个3
-        diff = [abs(x2_result[i][-1] - x2_result[i][0]) for i in range(0, len(x2_result), 1)]
+        diff = []
+        if (_mode == "up"):
+            diff = [x2_result[i][-1] - x2_result[i][0] for i in range(0, len(x2_result), 1)]
+        elif (_mode == "down"):
+            diff = [x2_result[i][0] - x2_result[i][-1] for i in range(0, len(x2_result), 1)]
+
         maxIndex = diff.index(max(diff))  # 最大值index
         DifferenceList_x1 = x1_result[maxIndex]
         DifferenceList_x2 = x2_result[maxIndex]
@@ -256,7 +261,7 @@ df = rds.getBatchData(batchStr, 0)
 # 获取数据是否连续
 # indexList=ts.check_ts_continuity(_series)
 # 定义使用的列
-useCol = [1,9]#, 10, 11, 12]
+useCol = [1, 9]  # , 10, 11, 12]
 df = DataFrame(df.values[:, useCol])
 # diffCol = [0,1,2,3,4,5,6]
 # 目标列Y
@@ -272,5 +277,5 @@ cPlt.singlePlot(df, _title=batchStr)
 # cp1 = getDifferenceList_Top(df, 5, 21)
 # cp1 = getDifferenceList(df, 5,1)
 # dt = DataFrame(df[[1]])
-cp1 = getDifferenceList_Top(df, 10, 5, _isPlot=True)
+cp1 = getDifferenceList_Top(df, 10, 5, _mode="up", _isPlot=True)
 # print(cp1)
