@@ -12,6 +12,7 @@ from sklearn.cluster import KMeans
 
 def kmeans_building(x1, x2, types_num, types, colors, shapes, _isPlot=False):
     X = np.array(list(zip(x1, x2))).reshape(len(x1), 2)
+    # KMeans(algorithm='auto', copy_x=True, init='k-means++', max_iter=300,n_clusters=3, n_init=10, n_jobs=None, precompute_distances='auto',random_state=None, tol=0.0001, verbose=0)
     kmeans_model = KMeans(n_clusters=types_num).fit(X)  # 设置聚类数n_clusters的值为types_num
     # 整理分类好的原始数据, 并画出聚类图
     x1_result = [];
@@ -162,7 +163,7 @@ def getDifferenceList_aut(_df, _stdGCount, _per, _isPlot=False):
 
 # 按照移动极差topN 获取范围
 # df 批次数据 _stdGCount 移动极差样本数 _stdTop 极差topN
-def getDifferenceList_Top(_df, _stdGCount, _stdTop, _mode="up", _isPlot=False):
+def getDifferenceList_Top(_df, _stdGPro, _stdTop, _mode="up", _isPlot=False):
     df = _df
     plt.figure(figsize=(8, 6))
     x1 = df.index  # x坐标列表
@@ -176,10 +177,22 @@ def getDifferenceList_Top(_df, _stdGCount, _stdTop, _mode="up", _isPlot=False):
         kmeans_model, x1_result, x2_result = kmeans_building(x1, x2, 3, labels, colors, shapes,
                                                              _isPlot)  # 本例要分3类，所以传入一个3
         diff = []
+
+        diff_series = [pd.Series(x2_result[i], index=x1_result[i]) for i in range(0, len(x2_result), 1)]
+
+        # diff_max = [diff_series[i].sort_values(ascending=False)[0] for i in range(0, len(diff_series), 1)]
+        # diff_min = [diff_series[i].sort_values(ascending=True)[0] for i in range(0, len(diff_series), 1)]
+
+        # diff_max = [max(x2_result) for i in range(0, len(x2_result), 1)]
+        # diff_min = [min(x2_result) for i in range(0, len(x2_result), 1)]
+        # diff_jc = [diff_max[i] - diff_min[i] for i in range(len(diff_max))]
+
         if (_mode == "up"):
-            diff = [x2_result[i][-1] - x2_result[i][0] for i in range(0, len(x2_result), 1)]
+            # diff = [x2_result[i][-1] - x2_result[i][0] for i in range(0, len(x2_result), 1)]
+            diff = [x2_result[i][-1] - min(x2_result[i]) for i in range(0, len(x2_result), 1)]
         elif (_mode == "down"):
-            diff = [x2_result[i][0] - x2_result[i][-1] for i in range(0, len(x2_result), 1)]
+            # diff = [x2_result[i][0] - x2_result[i][-1] for i in range(0, len(x2_result), 1)]
+            diff = [x2_result[i][0] - min(x2_result[i]) for i in range(0, len(x2_result), 1)]
 
         maxIndex = diff.index(max(diff))  # 最大值index
         DifferenceList_x1 = x1_result[maxIndex]
@@ -189,8 +202,10 @@ def getDifferenceList_Top(_df, _stdGCount, _stdTop, _mode="up", _isPlot=False):
         # 移动标准差
         # Difference_std = DifferenceSeries.rolling(_stdGCount).std()
         # 移动极差
+        _stdGCount = int(len(DifferenceSeries) * _stdGPro)
         Difference_max = DifferenceSeries.rolling(_stdGCount).max()
         Difference_min = DifferenceSeries.rolling(_stdGCount).min()
+
         Difference_std = Difference_max.sub(Difference_min)
 
         Difference_std_sort = Difference_std.sort_values(ascending=False)
@@ -253,7 +268,7 @@ def getHeadOrTail(_series, _type):
 
 
 # 批次
-batchStr = "t1zc0001*"
+batchStr = "t1zc0009*"
 # 获取批次数据
 df = rds.getBatchData(batchStr, 0)
 # #获取时间列
@@ -261,14 +276,14 @@ df = rds.getBatchData(batchStr, 0)
 # 获取数据是否连续
 # indexList=ts.check_ts_continuity(_series)
 # 定义使用的列
-useCol = [1, 9]  # , 10, 11, 12]
+useCol = [1, 2, 3, 4, 5, 6, 7, 8, 9]  # , 10, 11, 12]
 df = DataFrame(df.values[:, useCol])
 # diffCol = [0,1,2,3,4,5,6]
 # 目标列Y
 yCol = 6
 # 时间频率
 freq = 6
-df = df[:int(len(df) / 2)]
+df = df[:int(len(df) / 4)]
 # df = df[35:49]
 cPlt.singlePlot(df, _title=batchStr)
 # cp = bsPre.compute_ChangePoint(df, _mode="last")
@@ -277,5 +292,5 @@ cPlt.singlePlot(df, _title=batchStr)
 # cp1 = getDifferenceList_Top(df, 5, 21)
 # cp1 = getDifferenceList(df, 5,1)
 # dt = DataFrame(df[[1]])
-cp1 = getDifferenceList_Top(df, 10, 5, _mode="up", _isPlot=True)
+cp1 = getDifferenceList_Top(df, 0.1, 5, _mode="up", _isPlot=False)
 # print(cp1)
