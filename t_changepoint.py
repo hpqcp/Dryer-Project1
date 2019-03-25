@@ -148,7 +148,7 @@ def getDifferenceList_aut(_df, _stdGCount,_per ,_isPlot=False):
 
 # 按照移动极差topN 获取范围
 # df 批次数据 _stdGCount 移动极差样本数 _stdTop 极差topN
-def getDifferenceList_Top(_df, _stdGCount, _stdTop, _isPlot=False):
+def getDifferenceList_Top(_df, _stdGCount, _stdTop, _mode = "last",_isPlot=False):
     df = _df
     plt.figure(figsize=(8, 6))
     x1 = df.index  # x坐标列表
@@ -210,10 +210,10 @@ def getDifferenceList_Top(_df, _stdGCount, _stdTop, _isPlot=False):
                 DifferenceSeries.index.values <= Difference_std_topIndex[-1])]
         result_list.append(result_series)
         plt.scatter(result_series.index, result_series.values)
-        plt.legend()
-        plt.show()
+        if (_isPlot == True) :
+            plt.legend()
+            plt.show()
         # cPlt.singlePlot(result_series.to_frame(name=None), _name="", _title="")
-        print()
     return result_list
 
 
@@ -235,11 +235,11 @@ yCol = 6
 freq = 6
 df = df[:int(len(df) / 2)]
 # df = df[35:49]
-# cPlt.singlePlot(df,_title=batchStr)
+cPlt.singlePlot(df,_title=batchStr)
 # cp = bsPre.compute_ChangePoint(df, _mode="last")
 # print(cp)
 # df 批次数据 _stdGCount 移动极差样本数 _stdTop 极差topN
 # cp1 = getDifferenceList_Top(df, 5, 21)
 # cp1 = getDifferenceList(df, 5,1)
-cp1 = getDifferenceList_aut(df, 5,0.07)
+cp1 = getDifferenceList_Top(df,5,3,_isPlot=True)
 print(cp1)
