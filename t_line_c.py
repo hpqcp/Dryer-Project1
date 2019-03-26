@@ -40,7 +40,7 @@ def MergeBatch(_batchList,_db):
         df = DataFrame(df.values[:, useCol])
         df = bsTrans.data_alignment(df, putTimes)
         dfAll = dfAll.append(df)
-        dfAll = dfAll.reset_index(drop=True)
+    dfAll = dfAll.reset_index(drop=True)
     return dfAll
 
 
