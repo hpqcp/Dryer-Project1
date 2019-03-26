@@ -17,7 +17,7 @@ from sklearn import metrics
 
 rf = RandomForestRegressor()
 dfAll = DataFrame()
-for i in range(0,7,1):
+for i in range(0,7,1): 
     # 批次
     batchStr = "t1zc0000*"
     # 获取批次数据
