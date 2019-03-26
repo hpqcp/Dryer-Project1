@@ -2,7 +2,7 @@ import utils.excel2redis as rds
 import base.timeseries_process as ts
 import chart.plot as cPlt
 import base.data_preProcess as bsPre
-import  base.data_transform as bsTrans
+import base.data_transform as bsTrans
 
 import pandas as pd
 import numpy as np
@@ -15,58 +15,83 @@ from sklearn.model_selection import cross_val_score
 from sklearn.ensemble import RandomForestRegressor
 from sklearn import metrics
 
+# 定义使用的列
+useCol = [1, 5, 6, 7, 9]  # , 10, 11, 12]
+# df = DataFrame(df.values[:, useCol])
+diffCol = [0, 1, 2, 3, 4]
+# 目标列Y
+yCol = 4
+# 时间频率
+freq = 6
+# 延时
+putTimes = [0, 90, 136, 361, 390, 420]
+
+
+def MergeBatch(_batchList):
+    dfAll = DataFrame()
+    for _li in _batchList:
+        batchStr = _li
+        # 获取批次数据
+        df = rds.getBatchData(batchStr, 0)
+        # #获取时间列
+        # _series = pd.Series(df[0].values, index = df.index.values)
+        # 获取数据是否连续
+        # indexList=ts.check_ts_continuity(_series)
+        df = DataFrame(df.values[:, useCol])
+        df = bsTrans.data_alignment(df, putTimes)
+        dfAll = dfAll.append(df)
+        dfAll = dfAll.reset_index(drop=True)
+    return dfAll
+
+
+batchList = ["t1zc0000*", "t1zc0001*", "t1zc0002*", "t1zc0003*", "t1zc0004*"]
+allDf = MergeBatch(batchList)
+
 rf = RandomForestRegressor()
-dfAll = DataFrame()
-for i in range(0,7,1): 
-    # 批次
-    batchStr = "t1zc0000*"
-    # 获取批次数据
-    df = rds.getBatchData(batchStr, 0)
-    # #获取时间列
-    # _series = pd.Series(df[0].values, index = df.index.values)
-    # 获取数据是否连续
-    # indexList=ts.check_ts_continuity(_series)
-    # 定义使用的列
-    useCol = [1, 5, 6,7,9]  # , 10, 11, 12]
-    df = DataFrame(df.values[:, useCol])
-    diffCol = [0,1,2,3,4]
-    # 目标列Y
-    yCol = 4
-    # 时间频率
-    freq = 6
-    # df = df[35:49]
-    putTimes = [0,90,136,361,390,420]
-    df = bsTrans.data_alignment(df,putTimes)
 
+df = allDf
+batchStr = ""
+# # 批次
+# batchStr = "t1zc0000*"
+# # 获取批次数据
+# df = rds.getBatchData(batchStr, 0)
+#
+# # #获取时间列
+# # _series = pd.Series(df[0].values, index = df.index.values)
+# # 获取数据是否连续
+# # indexList=ts.check_ts_continuity(_series)
 
+# # df = df[35:49]
+# putTimes = [0, 90, 136, 361, 390, 420]
+# df = bsTrans.data_alignment(df, putTimes)
 
 cPlt.singlePlot(df, _title=batchStr)
-df = df[:]#int(len(df) / 4)]
-#原始
-xa,xb,ya,yb = bsTrans.dataPartition(df.iloc[:,diffCol],yCol)
-rf.fit(xa,ya)
+df = df[:]  # int(len(df) / 4)]
+# 原始
+xa, xb, ya, yb = bsTrans.dataPartition(df.iloc[:, diffCol], yCol)
+rf.fit(xa, ya)
 p = rf.predict(xb)
-print ("MSE:",metrics.mean_squared_error(yb, p))
+print("MSE:", metrics.mean_squared_error(yb, p))
 # #移动平均
-dfRoll = bsTrans.dataFrameRoll(df,freq,diffCol)
-xa1,xb1,ya1,yb1 = bsTrans.dataPartition(dfRoll,yCol)
-rf.fit(xa1,ya1)
+dfRoll = bsTrans.dataFrameRoll(df, freq, diffCol)
+xa1, xb1, ya1, yb1 = bsTrans.dataPartition(dfRoll, yCol)
+rf.fit(xa1, ya1)
 p1 = rf.predict(xb1)
-print ("MSE-roll:",metrics.mean_squared_error(yb1, p1))
-#分段平均
-dfSplite = DataFrame(bsTrans.splitMean(df.values[:,diffCol],freq))
-xa2,xb2,ya2,yb2 = bsTrans.dataPartition(dfSplite,yCol)
-rf.fit(xa2,ya2)
+print("MSE-roll:", metrics.mean_squared_error(yb1, p1))
+# 分段平均
+dfSplite = DataFrame(bsTrans.splitMean(df.values[:, diffCol], freq))
+xa2, xb2, ya2, yb2 = bsTrans.dataPartition(dfSplite, yCol)
+rf.fit(xa2, ya2)
 p2 = rf.predict(xb2)
-print ("MSE-split:",metrics.mean_squared_error(yb2, p2))
+print("MSE-split:", metrics.mean_squared_error(yb2, p2))
 
-d = DataFrame({"T":yb,"P":p})
-d1= DataFrame({"T1":yb1,"P1":p1})
-d2= DataFrame({"T2":yb2,"P2":p2})
-c=[d,d1,d2]
-cName = ["Origin","rollMean","splitMean"]
-cPlt.pairPlot(c,cName,[12,16])
-cPlt.pairPlot(c,cName)
+d = DataFrame({"T": yb, "P": p})
+d1 = DataFrame({"T1": yb1, "P1": p1})
+d2 = DataFrame({"T2": yb2, "P2": p2})
+c = [d, d1, d2]
+cName = ["Origin", "rollMean", "splitMean"]
+cPlt.pairPlot(c, cName, [12, 16])
+cPlt.pairPlot(c, cName)
 
 print(df.corr())
 

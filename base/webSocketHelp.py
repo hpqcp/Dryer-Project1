@@ -23,7 +23,7 @@ class WebSocketHelp:
 
 if __name__ == "__main__":
     df = WebSocketHelp.WebSocketJson("ws://10.130.65.207:8181/HisWeb",
-                                     "HZCF.U_Enriche_11400000170.DC_LJLL||2018-09-02 08:00:00||2018-09-02 09:00:00||Full||6000")
+                                     "HZCF.U_Maker_11010011004.RD_QualifiedGoods||2019-03-26 12:00:00||2019-03-26 15:30:00||Full||6000")
     print()
     print(df)
 
