@@ -40,6 +40,7 @@ def dataPartition(_df, _predictColNum, _partNum=0.8, _mode="seq"):
     fisrtNum = int(rowSize * _partNum)
     valuesTest = _df.values[:, _predictColNum]
     valuesLearn = _df.values[:, [j for j in range(0, colSize - 1, 1) if j != _predictColNum]]
+    
     return valuesLearn[:fisrtNum], valuesLearn[fisrtNum:], valuesTest[:fisrtNum], valuesTest[fisrtNum:]
 
 

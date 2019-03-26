@@ -69,6 +69,7 @@ per80 = np.percentile(bsTrans.diff(df.values[:,[3]]),80)
 per50 = np.median(bsTrans.diff(df.values[:,[3]]))
 print(bsTrans.trend(dfSplite.values[:,[3]]))
 
+
 # diff1 = DataFrame(bsTrans.diff(df.values[:,[1,3,5,7,9,11,13,15]]))
 # pyplot.plot(diff1.values[:,7])
 #
