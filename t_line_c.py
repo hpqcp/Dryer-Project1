@@ -47,6 +47,7 @@ def MergeBatch(_batchList,_db):
 batchList = ["t1zc0000*", "t1zc0001*", "t1zc0002*", "t1zc0003*", "t1zc0004*"]
 allDf = MergeBatch(batchList,0)
 
+
 rf = RandomForestRegressor()
 
 df = allDf
