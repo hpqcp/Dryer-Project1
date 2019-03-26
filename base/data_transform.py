@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import random as ra
 from pandas import DataFrame
 
 '''
@@ -29,8 +30,10 @@ def dataFrameRoll(_df, _freq, _colNum=[]):
 
 '''自动划分训练集、测试集
 '''
+
+
 # _mode = {seq,random}
-def dataPartition(_df, _predictColNum, _partNum=0.8, _mode="seq"):
+def dataPartition(_df, _predictColNum, _partNum=0.8, _mode="random"):
     if _partNum > 1 or _partNum <= 0:
         return -1, -1, -1, -1
     rowSize = _df.shape[0]
@@ -40,13 +43,23 @@ def dataPartition(_df, _predictColNum, _partNum=0.8, _mode="seq"):
     fisrtNum = int(rowSize * _partNum)
     valuesTest = _df.values[:, _predictColNum]
     valuesLearn = _df.values[:, [j for j in range(0, colSize - 1, 1) if j != _predictColNum]]
-    
-    return valuesLearn[:fisrtNum], valuesLearn[fisrtNum:], valuesTest[:fisrtNum], valuesTest[fisrtNum:]
+    if (_mode == "seq"):
+        return valuesLearn[:fisrtNum], valuesLearn[fisrtNum:], valuesTest[:fisrtNum], valuesTest[fisrtNum:]
+    elif (_mode == "random"):
+        lenSize = int(rowSize * _partNum)
+        idxLList = []
+        idxList = [j for j in range(0, rowSize, 1)]
+        idx_max = max(idxList)
+        idx_min = min(idxList)
+        for i in range(0, lenSize, 1):
+            idx_ra = ra.randint(0, len(idxList)-1)
+            idxLList.append(idxList[idx_ra])
+            idxList.pop(idx_ra)
+        idxTList = idxList
+        return valuesLearn[idxLList], valuesLearn[idxTList], valuesTest[idxLList], valuesTest[idxTList]
 
-
-
-
-
+    else:
+        return -1, -1, -1, -1
 
 
 '''生成数差（即后一个值减前一个值）

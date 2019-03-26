@@ -14,8 +14,8 @@ class WebSocketHelp:
         data_list = json.loads(result)
         if (data_list["ResultState"] == 1):
             datajson = json.loads(data_list["Message"])
-            data = [[d['TagName'], d['DateTime'], d['Value'],d['vValue']] for d in datajson]
-            df = pd.DataFrame(data, columns=['TagName', 'DateTime', 'Value','vValue'])
+            data = [[d['TagName'], d['DateTime'], d['Value'], d['vValue']] for d in datajson]
+            df = pd.DataFrame(data, columns=['TagName', 'DateTime', 'Value', 'vValue'])
             return df
         else:
             return None
@@ -23,5 +23,7 @@ class WebSocketHelp:
 
 if __name__ == "__main__":
     df = WebSocketHelp.WebSocketJson("ws://10.130.65.207:8181/HisWeb",
-                                     "HZCF.U_Enriche_11400000170.DC_SSLL||2019-03-25 08:00:00||2019-03-25 16:00:00||Full||6000")
+                                     "HZCF.U_Enriche_11400000170.DC_LJLL||2018-09-02 08:00:00||2018-09-02 09:00:00||Full||6000")
+    print()
     print(df)
+
