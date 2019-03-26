@@ -29,8 +29,7 @@ def dataFrameRoll(_df, _freq, _colNum=[]):
 
 '''自动划分训练集、测试集
 '''
-
-
+# _mode = {seq,random}
 def dataPartition(_df, _predictColNum, _partNum=0.8, _mode="seq"):
     if _partNum > 1 or _partNum <= 0:
         return -1, -1, -1, -1
@@ -42,6 +41,11 @@ def dataPartition(_df, _predictColNum, _partNum=0.8, _mode="seq"):
     valuesTest = _df.values[:, _predictColNum]
     valuesLearn = _df.values[:, [j for j in range(0, colSize - 1, 1) if j != _predictColNum]]
     return valuesLearn[:fisrtNum], valuesLearn[fisrtNum:], valuesTest[:fisrtNum], valuesTest[fisrtNum:]
+
+
+
+
+
 
 
 '''生成数差（即后一个值减前一个值）
