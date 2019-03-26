@@ -27,12 +27,12 @@ freq = 6
 putTimes = [0, 90, 136, 361, 390, 420]
 
 
-def MergeBatch(_batchList):
+def MergeBatch(_batchList,_db):
     dfAll = DataFrame()
     for _li in _batchList:
         batchStr = _li
         # 获取批次数据
-        df = rds.getBatchData(batchStr, 0)
+        df = rds.getBatchData(batchStr, _db)
         # #获取时间列
         # _series = pd.Series(df[0].values, index = df.index.values)
         # 获取数据是否连续
@@ -45,7 +45,7 @@ def MergeBatch(_batchList):
 
 
 batchList = ["t1zc0000*", "t1zc0001*", "t1zc0002*", "t1zc0003*", "t1zc0004*"]
-allDf = MergeBatch(batchList)
+allDf = MergeBatch(batchList,0)
 
 rf = RandomForestRegressor()
 
