@@ -55,7 +55,7 @@ def dataPartition(_df, _predictColNum, _partNum=0.8, _mode="random"):
             idx_ra = ra.randint(0, len(idxList)-1)
             idxLList.append(idxList[idx_ra])
             idxList.pop(idx_ra)
-            
+
         idxTList = idxList
         return valuesLearn[idxLList], valuesLearn[idxTList], valuesTest[idxLList], valuesTest[idxTList]
 
