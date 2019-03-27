@@ -21,6 +21,7 @@ endTime = "2019-01-01 23:59:59"
 hisSType = "Cyclic"
 frequency = "3600000"
 
+
 df = WebSocketHelp.WebSocketJson(webScortUrl,
                                  IDTagName + "||" + startTime + "||" + endTime + "||" + hisSType + "||" + frequency)
 
