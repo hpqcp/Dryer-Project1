@@ -75,7 +75,7 @@ for name, group in dfFL.groupby('批次号实时点'):
     BatchCutDf = BatchCutDf.append([{'PCH': b1, 'PH': b2,
                                      'StartTime': b3, 'EndTime': b4}],
                                    ignore_index=True)
-    print()
+
 # 批次开始结束时间（时间精确到分钟）
 print(BatchCutDf)
 

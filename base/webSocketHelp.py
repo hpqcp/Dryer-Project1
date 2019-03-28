@@ -32,8 +32,10 @@ class WebSocketHelp:
 
 if __name__ == "__main__":
     df = WebSocketHelp.WebSocketJson("ws://10.130.65.207:8181/HisWeb",
-                                     "MES2RTDATA.U_DRY_11010160002.DC_PCH,MES2RTDATA.U_DRY_11010160002.DC_PH||2019-01-26 15:00:00||2019-01-26 17:30:00||Cyclic||360000")
+                                     "MES-REALTIMEDB.U_Handle_1601001.DC_Data6||2019-03-5 10:30:00||2019-03-5 12:30:00||Full||1000")
     print()
     print(df)
-    dfGroup = WebSocketHelp.DfGroup(df, 'TagName')
-    print(dfGroup)
+    # dfGroup = WebSocketHelp.DfGroup(df, 'TagName')
+    # print(dfGroup)
+
+
