@@ -81,8 +81,6 @@ def trend(_series):
 
 '''数据对齐
 '''
-
-
 def data_alignment(_df, _putTimes):
     dfC = _df.shape[1]
     dfR = _df.shape[0]
