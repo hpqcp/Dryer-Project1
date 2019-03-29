@@ -3,7 +3,8 @@ from base.webSocketHelp import WebSocketHelp
 import pandas as pd
 import base.HisHelp as his
 import datetime
-import entity.HisBatchEntity
+from entity.HisBatchEntity import HisBatchEntity
+
 
 # 行转列
 def RowToColumn(_df, _groupName, _vColumns):
@@ -104,6 +105,8 @@ for ImIndex, ImRow in BatchCutDf.iterrows():
     jsonStr = ImRow["GroupParameterTag"] + "||" + bStartTime + "||" + bEndTime + "||Cyclic||1000"
     StageBatchDf = WebSocketHelp.WebSocketJson(webScortUrl, jsonStr)
     StageBatchDf = his.RowToColumn(StageBatchDf, 'TagName', 'Value', _indexName='DateTime', _havIndex=True)
-    hisBatchEntity = HisBatchEntity(ImRow['PCH'])
+
+    hisBatchEntity = HisBatchEntity(ImRow['PCH'], ImRow['PH'], ImRow['StartTime'], ImRow['EndTime'], StageBatchDf)
+
 # 将异常批次数据存入redis
 print()
