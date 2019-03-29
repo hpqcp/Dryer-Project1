@@ -3,7 +3,6 @@
 ###
 
 
-
 import pandas as pd
 import numpy as np
 from pandas import DataFrame
@@ -17,10 +16,10 @@ from sklearn.cluster import KMeans
 def check_batch_point(_df, _groupRatio=0.1, _GroupTop=5):
     # 将df分为前后两半
     firstDf = _df[:int(_df.shape[0] / 2)]
-    lastDf = _df[firstDf.shape[0]:].reset_index(drop=True)
+    lastDf = _df[firstDf.shape[0]:]
     # 处理前半部分数据
-    lsFirst = getDifferenceList_Top(firstDf, _stdGPro=_groupRatio, _stdTop=_GroupTop, _mode="up", _isPlot=True)
-    lsLast = getDifferenceList_Top(lastDf, _stdGPro=_groupRatio, _stdTop=_GroupTop, _mode="down", _isPlot=True)
+    lsFirst = getDifferenceList_Top(firstDf, _stdGPro=_groupRatio, _stdTop=_GroupTop, _mode="up", _isPlot=False)
+    lsLast = getDifferenceList_Top(lastDf, _stdGPro=_groupRatio, _stdTop=_GroupTop, _mode="down", _isPlot=False)
     print(lsFirst)
     print(lsLast)
 
@@ -30,7 +29,9 @@ def check_batch_point(_df, _groupRatio=0.1, _GroupTop=5):
 # _mode = up 上升波形（料头）  ， down 下降波形（料尾）
 # _isPlot 是否绘图
 def getDifferenceList_Top(_df, _stdGPro, _stdTop, _mode="up", _isPlot=False):
-    df = _df
+    oriIndex = _df.index.values[0]
+
+    df = _df.reset_index(drop=True)
     x1 = df.index  # x坐标列表
     result_list = []
     if (_isPlot == True):
@@ -76,7 +77,13 @@ def getDifferenceList_Top(_df, _stdGPro, _stdTop, _mode="up", _isPlot=False):
 
         result_series = DifferenceSeries[(DifferenceSeries.index.values >= all_list[0]) & (
                 DifferenceSeries.index.values <= all_list[-1])]
-        result_list.append(result_series)
+        if (_mode == "up"):
+            iv = getHeadOrTail(result_series, "Last", _oriIndex=oriIndex)
+            result_list.append(iv)
+        else:
+            iv = getHeadOrTail(result_series, "First", _oriIndex=oriIndex)
+            result_list.append(iv)
+        # result_list.append(result_series)
         if (_isPlot == True):
             plt.scatter(result_series.index, result_series.values)
             plt.legend()
@@ -84,16 +91,16 @@ def getDifferenceList_Top(_df, _stdGPro, _stdTop, _mode="up", _isPlot=False):
     return result_list
 
 
-# 获取最后一个最小值或第一最大值
-def getHeadOrTail(_series, _type):
+# 获取最后一个最小值或第一个最小值
+def getHeadOrTail(_series, _type, _oriIndex=0):
     if (_type == "Last"):
         minV = min(_series.values)
         min_series = _series[_series.values == minV]
-        return [min_series.values[-1], min_series.index.values[-1]]
+        return [(min_series.index.values[-1] + _oriIndex), min_series.values[-1]]
     elif (_type == "First"):
-        maxV = max(_series.values)
-        max_series = _series[_series.values == maxV]
-        return [max_series.values[0], max_series.index.values[0]]
+        minV = min(_series.values)
+        min_series = _series[_series.values == minV]
+        return [(min_series.index.values[0] + _oriIndex), min_series.values[0]]
 
 
 def kmeans_building(x1, x2, types_num, types, colors, shapes, _isPlot=False):
@@ -136,5 +143,5 @@ if __name__ == "__main__":
     df = df[useCol]
     df = df[:]  # int(len(df) / 4)]
     # df = df[35:49]
-    # cPlt.singlePlot(df, _title=batchStr)
+    cPlt.singlePlot(df, _title=batchStr)
     check_batch_point(df)
