@@ -87,14 +87,17 @@ print(BatchCutDf)
 
 # 按时间牌号获取关键参数点
 impParDf = ms.GetImpParameter(FactoryCode, ZoneName, BrandName, LineName, StageName, parNameList)
+impParSeries = pd.Series(impParDf['ParameterName'].values, index=impParDf['GroupParameterTag'].values)
+impParStr = ','.join(impParSeries.index.values)
 
 # 按时间关键参数点获取数据
+hisBatchList = []
 for ImIndex, ImRow in BatchCutDf.iterrows():
     # 时间延长
     delta = datetime.timedelta(minutes=Delay)
 
-    bStartTimeDt = datetime.datetime.strptime(ImRow['StartTime'], '%Y-%m-%d %H:%M:%S')
-    bEndTimeDt = datetime.datetime.strptime(ImRow['EndTime'], '%Y-%m-%d %H:%M:%S')
+    bStartTimeDt = datetime.datetime.strptime(ImRow['StartTime'], '%Y-%m-%d %H:%M:%S.%f')
+    bEndTimeDt = datetime.datetime.strptime(ImRow['EndTime'], '%Y-%m-%d %H:%M:%S.%f')
 
     bStartTimeDt = bStartTimeDt - delta
     bEndTimeDt = bEndTimeDt + delta
@@ -102,11 +105,14 @@ for ImIndex, ImRow in BatchCutDf.iterrows():
     bStartTime = bStartTimeDt.strftime("%Y-%m-%d %H:%M:%S")
     bEndTime = bEndTimeDt.strftime("%Y-%m-%d %H:%M:%S")
 
-    jsonStr = ImRow["GroupParameterTag"] + "||" + bStartTime + "||" + bEndTime + "||Cyclic||1000"
+    jsonStr = impParStr + "||" + bStartTime + "||" + bEndTime + "||Cyclic||1000"
     StageBatchDf = WebSocketHelp.WebSocketJson(webScortUrl, jsonStr)
     StageBatchDf = his.RowToColumn(StageBatchDf, 'TagName', 'Value', _indexName='DateTime', _havIndex=True)
-
+    c = impParSeries[StageBatchDf.columns.values.tolist()].values
+    # dfFL.rename(columns=[c], inplace=True)
+    StageBatchDf.columns = c
+    StageBatchDf = StageBatchDf[impParSeries.values]
     hisBatchEntity = HisBatchEntity(ImRow['PCH'], ImRow['PH'], ImRow['StartTime'], ImRow['EndTime'], StageBatchDf)
-
+    hisBatchList.append(hisBatchEntity)
+print(hisBatchList)
 # 将异常批次数据存入redis
-print()
