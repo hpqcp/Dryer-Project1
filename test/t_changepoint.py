@@ -286,7 +286,7 @@ freq = 6
 df = df[:]#int(len(df) / 4)]
 # df = df[35:49]
 cPlt.singlePlot(df, _title=batchStr)
-exit()
+
 # cp = bsPre.compute_ChangePoint(df, _mode="last")
 # print(cp)
 # df 批次数据 _stdGCount 移动极差样本数 _stdTop 极差topN
@@ -294,4 +294,4 @@ exit()
 # cp1 = getDifferenceList(df, 5,1)
 # dt = DataFrame(df[[1]])
 cp1 = getDifferenceList_Top(df, 0.1, 5, _mode="up", _isPlot=False)
-# print(cp1)
+print(cp1)
