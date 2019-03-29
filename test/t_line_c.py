@@ -27,6 +27,7 @@ freq = 6
 putTimes = [0, 90, 136, 361, 378, 420]
 
 
+
 def MergeBatch(_batchList,_db):
     dfAll = DataFrame()
     for _li in _batchList:
