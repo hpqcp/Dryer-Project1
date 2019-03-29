@@ -16,15 +16,15 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn import metrics
 
 # 定义使用的列
-useCol = [1, 5, 6]#, 7, 9]  # , 10, 11, 12]
+useCol = [1, 5, 6, 7, 8,9]  # , 10, 11, 12]
 # df = DataFrame(df.values[:, useCol])
-diffCol = [0, 1, 2]#, 3, 4]
+diffCol = [0, 1, 2, 3, 4,5]
 # 目标列Y
-yCol = 2
+yCol = 5
 # 时间频率
 freq = 6
 # 延时
-putTimes = [0, 90, 136]#, 361, 390, 420]
+putTimes = [0, 90, 136, 361, 378, 420]
 
 
 def MergeBatch(_batchList,_db):
@@ -39,14 +39,14 @@ def MergeBatch(_batchList,_db):
         # indexList=ts.check_ts_continuity(_series)
         df = DataFrame(df.values[:, useCol])
         df = bsTrans.data_alignment(df, putTimes)
-        df = df[1500:5000]
+        df = df[:]
         dfAll = dfAll.append(df)
         # print(dfAll.shape[0])
     dfAll = dfAll.reset_index(drop=True)
     return dfAll
 
 
-batchList = ["t1zc0008*", "t1zc0001*", "t1zc0002*", "t1zc0003*", "t1zc0004*","t1zc0005*" ,"t1zc0006*","t1zc0007*","t1zc0009*"]
+batchList = ["t1zc0000*", "t1zc0001*", "t1zc0002*", "t1zc0003*", "t1zc0004*","t1zc0005*" ,"t1zc0006*","t1zc0007*","t1zc0008*","t1zc0009*"]
 allDf = MergeBatch(batchList,0)
 
 
@@ -72,14 +72,14 @@ cPlt.singlePlot(df, _title=batchStr)
 df = df[:]  # int(len(df) / 4)]
 # 原始
 # xa, xb, ya, yb = bsTrans.dataPartition(df.iloc[:, diffCol], yCol)
-xa = df.iloc[:, [0,1]]#,2,3]]
-ya = df.iloc[:,2]
+xa = df.iloc[:, [0,1,2,3,4]]
+ya = df.iloc[:,5]
 df1 = rds.getBatchData("t1zc0000*", 0)
 df1 = DataFrame(df1.values[:, useCol])
 df1 = bsTrans.data_alignment(df1, putTimes)
-df1 = df1[1500:5000]
-xb = df1.iloc[:, [0,1]]#,2,3]]
-yb = df1.iloc[:,2]
+df1 = df1[:]
+xb = df1.iloc[:, [0,1,2,3,4]]
+yb = df1.iloc[:,5]
 
 
 rf.fit(xa, ya)
@@ -89,11 +89,11 @@ print("MSE:", metrics.mean_squared_error(yb, p))
 # #移动平均
 dfRoll = bsTrans.dataFrameRoll(df, freq, diffCol)
 # xa1, xb1, ya1, yb1 = bsTrans.dataPartition(dfRoll, yCol)
-xa1 = dfRoll.iloc[:, [0,1]]#,2,3]]
-ya1 = dfRoll.iloc[:,2]
+xa1 = dfRoll.iloc[:, [0,1,2,3,4]]
+ya1 = dfRoll.iloc[:,5]
 dfRoll_pre = bsTrans.dataFrameRoll(df1, freq, diffCol)
-xb1 = dfRoll_pre.iloc[:, [0,1]]#,2,3]]
-yb1 = dfRoll_pre.iloc[:,2]
+xb1 = dfRoll_pre.iloc[:, [0,1,2,3,4]]
+yb1 = dfRoll_pre.iloc[:,5]
 rf.fit(xa1, ya1)
 p1 = rf.predict(xb1)
 print("MSE-roll:", metrics.mean_squared_error(yb1, p1))
@@ -113,7 +113,7 @@ cName = ["Origin", "rollMean", "splitMean"]
 cPlt.pairPlot(c, cName, [12, 16])
 cPlt.pairPlot(c, cName)
 
-print(df.corr())
+
 
 # per20 = np.percentile(bsTrans.diff(df.values[:,[3]]),20)
 # per80 = np.percentile(bsTrans.diff(df.values[:,[3]]),80)
