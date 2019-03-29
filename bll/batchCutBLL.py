@@ -95,7 +95,6 @@ hisBatchList = []
 for ImIndex, ImRow in BatchCutDf.iterrows():
     # 时间延长
     delta = datetime.timedelta(minutes=Delay)
-
     bStartTimeDt = datetime.datetime.strptime(ImRow['StartTime'], '%Y-%m-%d %H:%M:%S.%f')
     bEndTimeDt = datetime.datetime.strptime(ImRow['EndTime'], '%Y-%m-%d %H:%M:%S.%f')
 
