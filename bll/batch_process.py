@@ -9,19 +9,20 @@ from pandas import DataFrame
 import matplotlib.pyplot as plt
 from sklearn.cluster import KMeans
 
-#
-#
-#
-def check_batch_point(_df,_groupRatio=0.1,_GroupTop=5):
 
-    #将df分为前后两半
-    firstDf = _df[:int(_df.shape[0]/2)]
-    lastDf = _df[firstDf.shape[0]:]
-    #处理前半部分数据
-    lsFirst = getDifferenceList_Top(firstDf, _stdGPro=_groupRatio, _stdTop=_GroupTop, _mode="up",)
-    lsLast = getDifferenceList_Top(lastDf, _stdGPro=_groupRatio, _stdTop=_GroupTop, _mode="down")
+#
+#
+#
+def check_batch_point(_df, _groupRatio=0.1, _GroupTop=5):
+    # 将df分为前后两半
+    firstDf = _df[:int(_df.shape[0] / 2)]
+    lastDf = _df[firstDf.shape[0]:].reset_index(drop=True)
+    # 处理前半部分数据
+    lsFirst = getDifferenceList_Top(firstDf, _stdGPro=_groupRatio, _stdTop=_GroupTop, _mode="up", _isPlot=True)
+    lsLast = getDifferenceList_Top(lastDf, _stdGPro=_groupRatio, _stdTop=_GroupTop, _mode="down", _isPlot=True)
     print(lsFirst)
     print(lsLast)
+
 
 # 按照移动极差topN 获取范围
 # _df 批次数据  ， _stdGPro 分组比率 ，  _stdTop 极差topN
@@ -81,6 +82,7 @@ def getDifferenceList_Top(_df, _stdGPro, _stdTop, _mode="up", _isPlot=False):
             plt.show()
     return result_list
 
+
 # 获取最后一个最小值或第一最大值
 def getHeadOrTail(_series, _type):
     if (_type == "Last"):
@@ -105,33 +107,33 @@ def kmeans_building(x1, x2, types_num, types, colors, shapes, _isPlot=False):
         temp1 = []
         x1_result.append(temp)
         x2_result.append(temp1)
-        for i, l in enumerate(kmeans_model.labels_):  # 画聚类点
-            x1_result[l].append(x1[i])
-            x2_result[l].append(x2[i])
-            if (_isPlot == True):
-                plt.scatter(x1[i], x2[i], c=colors[l], marker=shapes[l])
+    for i, l in enumerate(kmeans_model.labels_):  # 画聚类点
+        x1_result[l].append(x1[i])
+        x2_result[l].append(x2[i])
         if (_isPlot == True):
-            for i in range(len(list(kmeans_model.cluster_centers_))):  # 画聚类中心点
-                plt.scatter(list(list(kmeans_model.cluster_centers_)[i])[0],
-                            list(list(kmeans_model.cluster_centers_)[i])[1],
-                            c=colors[i], marker=shapes[i], label=types[i])
-            plt.legend()
-            plt.show()
+            plt.scatter(x1[i], x2[i], c=colors[l], marker=shapes[l])
+    if (_isPlot == True):
+        for i in range(len(list(kmeans_model.cluster_centers_))):  # 画聚类中心点
+            plt.scatter(list(list(kmeans_model.cluster_centers_)[i])[0],
+                        list(list(kmeans_model.cluster_centers_)[i])[1],
+                        c=colors[i], marker=shapes[i], label=types[i])
+        plt.legend()
+        plt.show()
     return kmeans_model, x1_result, x2_result
 
 
 if __name__ == "__main__":
     import utils.excel2redis as rds
     from pandas import DataFrame
-    import  chart.plot as cPlt
+    import chart.plot as cPlt
 
-
-    batchStr = "t1zc0009*"
+    batchStr = "t1zc0000*"
     # 获取批次数据
     df = rds.getBatchData(batchStr, 0)
     useCol = [1, 2, 3, 4, 5, 6, 7, 8, 9]  # , 10, 11, 12]
-    df = DataFrame(df.values[:, useCol])
+    # df = DataFrame(df.values[:, useCol])
+    df = df[useCol]
     df = df[:]  # int(len(df) / 4)]
     # df = df[35:49]
-    #cPlt.singlePlot(df, _title=batchStr)
+    # cPlt.singlePlot(df, _title=batchStr)
     check_batch_point(df)

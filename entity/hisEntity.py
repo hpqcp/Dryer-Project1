@@ -15,3 +15,4 @@ class HisEntity:
         self.ProcessName = ProcessName
         self.ParameterName = ParameterName
         self.HisDf = HisDf
+

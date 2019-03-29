@@ -1,6 +1,7 @@
 import pandas as pd
 
 
+# _df _groupName:以哪一列分组 _vColumns:以那一列作为数据 _indexName:以哪一列对齐（默认以索引对齐）_havIndex:是否显示对齐列
 def RowToColumn(_df, _groupName, _vColumns, _indexName="index", _havIndex=False):
     dfFL = pd.DataFrame()
     i = 0
