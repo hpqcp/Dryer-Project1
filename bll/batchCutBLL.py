@@ -104,7 +104,7 @@ for ImIndex, ImRow in BatchCutDf.iterrows():
     bStartTime = bStartTimeDt.strftime("%Y-%m-%d %H:%M:%S")
     bEndTime = bEndTimeDt.strftime("%Y-%m-%d %H:%M:%S")
 
-    jsonStr = impParStr + "||" + bStartTime + "||" + bEndTime + "||Cyclic||1000"
+    jsonStr = impParStr + "||" + bStartTime + "||" + bEndTime + "||Cyclic||10000"
     StageBatchDf = WebSocketHelp.WebSocketJson(webScortUrl, jsonStr)
     StageBatchDf = his.RowToColumn(StageBatchDf, 'TagName', 'Value', _indexName='DateTime', _havIndex=True)
     c = impParSeries[StageBatchDf.columns.values.tolist()].values
@@ -113,5 +113,8 @@ for ImIndex, ImRow in BatchCutDf.iterrows():
     StageBatchDf = StageBatchDf[impParSeries.values]
     hisBatchEntity = HisBatchEntity(ImRow['PCH'], ImRow['PH'], ImRow['StartTime'], ImRow['EndTime'], StageBatchDf)
     hisBatchList.append(hisBatchEntity)
+
+
 print(hisBatchList)
 # 将异常批次数据存入redis
+
