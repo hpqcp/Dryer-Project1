@@ -5,6 +5,7 @@ class HisBatchEntity:
     EndTime = ""
     HisDf = None
 
+
     def __init__(self, ):
         self
 

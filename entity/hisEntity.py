@@ -6,6 +6,7 @@ class HisEntity:
     TagName=""
     HisDf=None
 
+
     def __init__(self,):
         self
 
