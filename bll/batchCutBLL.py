@@ -137,7 +137,6 @@ for _hisBatchEntity in hisBatchList:
             # print(wt,len(wtDF),len(df))
             wtSeries = colSeries[p1 + wt[0]:p1 + wt[1]]
             # cPlt.singlePlot(df[p1 + wt[0]:p1 + wt[1]], _title=batchStr)
-
             abnSeries = wtSeries[wtSeries > up & wtSeries < down]  # 过滤获取异常数据
             if len(abnSeries) > 0:  # 如果存在超出标准的数据
                 # 毫厘牌号|毫厘牌号批次号|开始时间|结束时间|参数点
