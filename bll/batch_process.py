@@ -1,8 +1,6 @@
 ###
 ###
 ###
-
-
 import pandas as pd
 import numpy as np
 from pandas import DataFrame
@@ -11,7 +9,35 @@ from sklearn.cluster import KMeans
 
 
 #
+#批次稳态截取 - 自定义规则 1
 #
+def batch_Steadystate_r1(_series,_delay=300,_ratio=0.8):
+    #中位数、平均值
+    mid =  np.median(_series)
+    mean = np.mean(_series)
+    fValue = mid * _ratio #触发值
+    #数据分为两半
+    data1 = _series[:int(len(_series)/2)]
+    data2 = _series[len(data1):]
+    data2 = data2[::-1]  #数据方向反转
+    #获取第一个大于触发值的Loc
+    loc1 = np.where(data1 >= fValue)
+    loc2 = np.where(data2 >= fValue)
+    loc1 = loc1[0][0] + _delay
+    loc2 = loc2[0][0] + _delay
+    return [loc1,len(_series) - loc2]
+
+
+
+
+
+
+
+
+
+
+#
+#找到批次开始/结束点（0到非0）
 #
 def check_batch_point(_df, _groupRatio=0.1, _GroupTop=5):
     # 将df分为前后两半
@@ -20,8 +46,12 @@ def check_batch_point(_df, _groupRatio=0.1, _GroupTop=5):
     # 处理前半部分数据
     lsFirst = getDifferenceList_Top(firstDf, _stdGPro=_groupRatio, _stdTop=_GroupTop, _mode="up", _isPlot=False)
     lsLast = getDifferenceList_Top(lastDf, _stdGPro=_groupRatio, _stdTop=_GroupTop, _mode="down", _isPlot=False)
-    print(lsFirst)
-    print(lsLast)
+    # print(lsFirst)
+    # print(lsLast)
+    locFirst = [lsFirst[i][0] for i in range(0,len(lsFirst),1)]
+    locLast = [lsLast[i][0] for i in range(0, len(lsFirst), 1)]
+    return list(zip(locFirst,locLast))
+
 
 
 # 按照移动极差topN 获取范围
@@ -143,5 +173,12 @@ if __name__ == "__main__":
     df = df[useCol]
     df = df[:]  # int(len(df) / 4)]
     # df = df[35:49]
-    cPlt.singlePlot(df, _title=batchStr)
-    check_batch_point(df)
+    #cPlt.singlePlot(df, _title=batchStr)
+    point = check_batch_point(df)#获取批次开始结束点
+    p1 = point[0][0]
+    p2 = point[0][1]
+    wtDF = df.values[p1:p2,0]   #serieas
+    wt = batch_Steadystate_r1(wtDF)#批次截取方法
+    # print(wt,len(wtDF),len(df))
+    cPlt.singlePlot(df[p1+wt[0]:p1+wt[1]], _title=batchStr)
+    print(len(df[p1+wt[0]:p1+wt[1]]))
