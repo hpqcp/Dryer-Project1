@@ -73,9 +73,24 @@ class Sql200:
         return df
 
 
+class Sql_jc:
+    sql = None
+    engine = None
+
+    def GetEngine(self):
+        sql = SqlHelp("10.130.65.205", "1433", "admin", "1qaz@WSX", "jc")
+        return sql.GetEngine()
+
+    def ExecQuery(self, sql):
+        # create_engine('mssql+pymssql://scott:tiger@hostname:port/dbname')
+        self.engine = self.GetEngine()
+        df = pd.read_sql(sql=sql, con=self.engine)
+        return df
+
+
 if __name__ == "__main__":
-    ms = Sql200()
-    # df = ms.ExecQuery("SELECT * FROM B_Brand")
+    ms = Sql_jc()
+    df = ms.ExecQuery("SELECT *  FROM [jc].[dbo].[V_FlightOutDetailTable] t1   where t1.状态 = '异常'   order by t1.run_date ,t1.飞机注册号")
     # df = ms.GetImpParameter('1100', '制丝', '云烟(紫)模组一', 'C线', '切丝烘丝加香段', ['切叶丝含水率', '叶丝增温增湿工艺流量'])
-    df = ms.GetIDInf('1100', '制丝', '云烟(紫)模组一', 'C线', '切丝烘丝加香段', ['牌号实时点', '批次号实时点'])
+    #df = ms.GetIDInf('1100', '制丝', '云烟(紫)模组一', 'C线', '切丝烘丝加香段', ['牌号实时点', '批次号实时点'])
     print(df)
