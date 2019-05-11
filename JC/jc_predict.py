@@ -30,7 +30,7 @@ def predict(nodes):
         return  None
     else:
         for f in model_file_1[i-1]:
-            fileName = "c://jc_model//jc_" + f + ".m"
+            fileName = "E://工作文档//FangCloudV2//个人文件//9000其他//jc//dev//jc_model//jc_" + f + ".m"
             rf =joblib.load(fileName)
             col = xCols[f]
             lsP=list()
@@ -43,6 +43,6 @@ def predict(nodes):
 
 
 if __name__ == "__main__":
-    ls = [-58]
+    ls = [-58,-34]
     p=predict(ls)
     print(p)
