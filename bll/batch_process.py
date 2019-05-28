@@ -29,13 +29,6 @@ def batch_Steadystate_r1(_series,_delay=300,_ratio=0.8):
 
 
 
-
-
-
-
-
-
-
 #
 #找到批次开始/结束点（0到非0）
 #
@@ -165,7 +158,7 @@ if __name__ == "__main__":
     from pandas import DataFrame
     import chart.plot as cPlt
 
-    batchStr = "t1zc0000*"
+    batchStr = "t1zc0002*"
     # 获取批次数据
     df = rds.getBatchData(batchStr, 0)
     useCol = [1, 2, 3, 4, 5, 6, 7, 8, 9]  # , 10, 11, 12]
@@ -175,10 +168,13 @@ if __name__ == "__main__":
     # df = df[35:49]
     #cPlt.singlePlot(df, _title=batchStr)
     point = check_batch_point(df)#获取批次开始结束点
-    p1 = point[0][0]
-    p2 = point[0][1]
+    parmNo = 3
+    p1 = point[parmNo][0]
+    p2 = point[parmNo][1]
     wtDF = df.values[p1:p2,0]   #serieas
     wt = batch_Steadystate_r1(wtDF)#批次截取方法
     # print(wt,len(wtDF),len(df))
-    cPlt.singlePlot(df[p1+wt[0]:p1+wt[1]], _title=batchStr)
+    #cPlt.singlePlot(df[p1+wt[0]:p1+wt[1]], _title=batchStr)
+    cPlt.zsParmPlot(df.values[:,parmNo],_vline=[p1,p2,p1+wt[0],p1+wt[1]])
+
     print(len(df[p1+wt[0]:p1+wt[1]]))
