@@ -64,9 +64,10 @@ str1=''
 for ImIndex, ImRow in allDataDf.iterrows():
     timeArray = time.strptime(ImRow['采集时间'], "%Y/%m/%d %H:%M:%S")
     timeStamp = int(time.mktime(timeArray))
-    str1 = str1 + 'hsj,tag_name=' + ImRow['TagName']+' value='+str(ImRow['实时值'])+',vvalue='+str(ImRow['计算值'])+',time='+str(timeStamp)+'\n'
+    timeStamp = timeStamp + 28800
+    str1 = str1 + 'hsj,tag_name=' + ImRow['TagName']+' value='+str(ImRow['实时值'])+',vvalue='+str(ImRow['计算值'])+' '+str(timeStamp)+'000000000\n'
     #+',par_name='+ImRow['ParName']
-    #s = '''hsj,tag_name=server01 value=123,vvalue=321,time=1434055562000000000'''+'\n'
+    #s = '''hsj1,tag_name=server04 value=123,vvalue=321 1558353606000000000'''
     i=i+1
     if(i>=resultNum):
         resultList.append(str1)
