@@ -9,6 +9,7 @@ def all_path(dirname):
     for maindir, subdir, file_name_list in os.walk(dirname):
         if(dirname==maindir):
             continue
+            
         #print("1:",maindir) #当前主目录
         #print("2:",subdir) #当前主目录下的所有目录
         #print("3:",file_name_list)  #当前主目录下的所有文件
