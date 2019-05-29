@@ -34,3 +34,14 @@ def singlePlot(_df,_name=[],_ylim=[],_title=""):
 
     pyplot.show()
     return 0
+
+
+
+def zsParmPlot(_series,_vline=[],_title=""):
+    pyplot.figure()
+    pyplot.suptitle(_title)
+    pyplot.plot(_series)
+    if _vline :
+        [pyplot.axvline(_vline[i]) for i in range(0, len(_vline), 1)][:]
+    pyplot.show()
+    return  0
