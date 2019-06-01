@@ -30,7 +30,7 @@ def RowToColumn(_df, _groupName, _vColumns, _indexName="index", _havIndex=False)
 
 #获取牌号批次时间
 # 时间前后延长（分钟）
-def GetBatchCutDf(FactoryCode,ZoneName,BrandName,HLBrandName,LineName,StageName,Delay,startTime,endTime):
+def GetBatchCutDf(FactoryCode,ZoneName,BrandName,HLBrandName,LineName,StageName,startTime,endTime):
     IdTypeNameList = ['牌号实时点', '批次号实时点']
     webScortUrl = "ws://10.130.65.207:8181/HisWeb"
     ms = Sql200()
@@ -100,7 +100,7 @@ if __name__ == "__main__":
     LineName = 'C线'
     StageName = '切丝烘丝加香段'
     startTime = "2019-04-02 00:00:00"  # 按时间段查询批次（开始时间）
-    endTime = "2019-04-16 00:00:00"  # 按时间段查询批次（结束时间）
+    endTime = "2019-04-03 00:00:00"  # 按时间段查询批次（结束时间）
     Delay = 10 #时间范围延长（分钟）
-    BatchCutDf = GetBatchCutDf(FactoryCode,ZoneName,BrandName,HLBrandName,LineName,StageName,Delay,startTime,endTime)
+    BatchCutDf = GetBatchCutDf(FactoryCode,ZoneName,BrandName,HLBrandName,LineName,StageName,startTime,endTime)
     print(BatchCutDf)
