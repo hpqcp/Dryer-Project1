@@ -20,7 +20,7 @@ def getDateBySql(q):
         columns =data_list['results'][0]['series'][0]['columns']
         values = data_list['results'][0]['series'][0]['values']
         df = pd.DataFrame(values, columns=columns)
-        
+
         return df
     else:
         return None

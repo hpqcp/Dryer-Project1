@@ -1,5 +1,5 @@
 import pandas as pd
-import pymssql
+
 from sqlalchemy import create_engine
 
 
@@ -40,8 +40,8 @@ class Sql200:
     # _StageName='切丝烘丝加香段'
     def GetImpParameter(self, _FactoryCode, _ZoneName, _BrandName, _LineName, _StageName, _parNameList):
         parName = "'" + "','".join(_parNameList) + "'"
-        # parName = "'切叶丝含水率','叶丝增温增湿工艺流量','叶丝增温增湿蒸汽流量','薄板干燥热风温度','薄板干燥Ⅰ区筒壁温度','薄板干燥Ⅱ区筒壁温度','薄板干燥出料温度','薄板干燥出料含水率','叶丝冷却出料含水率'"
         ms = Sql200()
+        # parName = "'切叶丝含水率','叶丝增温增湿工艺流量','叶丝增温增湿蒸汽流量','薄板干燥热风温度','薄板干燥Ⅰ区筒壁温度','薄板干燥Ⅱ区筒壁温度','薄板干燥出料温度','薄板干燥出料含水率','叶丝冷却出料含水率'"
         df = ms.ExecQuery(
             "select ID,FactoryCode,FactoryName,ZoneCode,ZoneName,BrandCode,BrandName,LineID,LineName,StageID,StageName,ProcessID,ProcessName,ParameterID,ParameterName," +
             "GroupParameterTag,FactoryParameterTag,ZoneSort,LineSort,StageSort,ProcessSort,ParameterSort " +
@@ -53,6 +53,24 @@ class Sql200:
             "order by ZoneSort,LineSort,StageSort,ProcessSort,ParameterSort")
         return df
 
+    # 获取关键参数
+    # _FactoryCode='1100'
+    # _ZoneName='制丝'
+    # _BrandName='云烟(紫)模组一'
+    # _LineName='C线'
+    # _StageName='切丝烘丝加香段'
+    def GetImpParameterByLine(self, _FactoryCode, _ZoneName, _BrandName, _LineName):
+        ms = Sql200()
+        str=("select ID,FactoryCode,FactoryName,ZoneCode,ZoneName,BrandCode,BrandName,LineID,LineName,StageID,StageName,ProcessID,ProcessName,ParameterID,ParameterName," +
+        "GroupParameterTag,FactoryParameterTag,ZoneSort,LineSort,StageSort,ProcessSort,ParameterSort " +
+        "from V_FactoryToParameterRelation " +
+        "where 1 = 1 and GroupParameterTag is not null and FactoryParameterTag is not null " +
+        "and FactoryCode = '" + _FactoryCode + "' and ZoneName = '" + _ZoneName + "' " +
+        "and BrandName = '" + _BrandName + "' and LineName = '" + _LineName + "' " +
+        "and ParameterName not in ('叶丝增温增湿蒸汽流量') "
+        "order by ZoneSort,LineSort,StageSort,ProcessSort,ParameterSort")
+        df = ms.ExecQuery(str)
+        return df
 
     # 获取身份信息
     # _FactoryCode='1100'
@@ -64,12 +82,12 @@ class Sql200:
         # "0019de43-1a5c-4463-ac2a-ba64f1ff18a0"
         TypeName = "'" + "','".join(_TypeNameList) + "'"
         ms = Sql200()
-        df = ms.ExecQuery(
-            "select distinct * from V_StageRealTimePointBrand " +
+        str =("select distinct * from V_StageRealTimePointBrand " +
             "where FactoryCode='" + _FactoryCode + "' and ZoneName='" + _ZoneName + "' and BrandName='" + _BrandName + "' " +
             "and LineName='" + _LineName + "' and StageName='" + _StageName + "' " +
             "and TypeName in (" + TypeName + ") " +
             "order by FactoryCode,Linesort,Stagesort")
+        df = ms.ExecQuery(str)
         return df
 
 
@@ -89,8 +107,10 @@ class Sql_jc:
 
 
 if __name__ == "__main__":
-    ms = Sql_jc()
-    df = ms.ExecQuery("SELECT *  FROM [jc].[dbo].[V_FlightOutDetailTable] t1   where t1.状态 = '异常'   order by t1.run_date ,t1.飞机注册号")
+    ms = Sql200()
+    df = ms.ExecQuery("select * from B_Brand")
+    # ms = Sql_jc()
+    # df = ms.ExecQuery("SELECT *  FROM [jc].[dbo].[V_FlightOutDetailTable] t1   where t1.状态 = '异常'   order by t1.run_date ,t1.飞机注册号")
     # df = ms.GetImpParameter('1100', '制丝', '云烟(紫)模组一', 'C线', '切丝烘丝加香段', ['切叶丝含水率', '叶丝增温增湿工艺流量'])
     #df = ms.GetIDInf('1100', '制丝', '云烟(紫)模组一', 'C线', '切丝烘丝加香段', ['牌号实时点', '批次号实时点'])
     print(df)
