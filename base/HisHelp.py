@@ -101,6 +101,7 @@ if __name__ == "__main__":
     StageName = '切丝烘丝加香段'
     startTime = "2019-04-02 00:00:00"  # 按时间段查询批次（开始时间）
     endTime = "2019-04-03 00:00:00"  # 按时间段查询批次（结束时间）
-   
+
+
     BatchCutDf = GetBatchCutDf(FactoryCode,ZoneName,BrandName,HLBrandName,LineName,StageName,startTime,endTime)
     print(BatchCutDf)
