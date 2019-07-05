@@ -52,6 +52,7 @@ class WebSocketHelp:
             i = i + 1
         dfFL = dfFL.reset_index(drop=True)
         return dfFL
+
 if __name__ == "__main__":
     df = WebSocketHelp.WebSocketJson("ws://10.130.65.207:8181/HisWeb",
                                      "MES2RTDATA.U_BAL_11010010002.DC_LL,MES2RTDATA.U_CON_11010010003.DC_GTZS||2019-01-1 07:00:00||2019-01-1 09:00:00||Cyclic||1000")
