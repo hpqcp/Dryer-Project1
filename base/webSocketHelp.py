@@ -55,11 +55,17 @@ class WebSocketHelp:
 
 if __name__ == "__main__":
     df = WebSocketHelp.WebSocketJson("ws://10.130.65.207:8181/HisWeb",
-                                     "MES2RTDATA.U_BAL_11010010002.DC_LL,MES2RTDATA.U_CON_11010010003.DC_GTZS||2019-01-1 07:00:00||2019-01-1 09:00:00||Cyclic||1000")
-    df2 = WebSocketHelp.RowToColumn(df, 'TagName', 'Value', _indexName='DateTime', _havIndex=True)
+                                     "MES2RTDATA.U_Maker_11020030001.DC_JTH,MES2RTDATA.U_Maker_11020030001.DC_PH,MES2RTDATA.U_Maker_11020030001.DC_BC,"
+                                     "MES2RTDATA.U_Maker_11020030001.DC_YXSD,MES2RTDATA.U_Maker_11020030001.DC_LLCL,MES2RTDATA.U_Maker_11020030001.DC_SJCL,"
+                                     "MES2RTDATA.U_Maker_11020030001.DC_ZCL,MES2RTDATA.U_Maker_11020030001.DC_FPL,MES2RTDATA.U_Maker_11020030001.DC_LYL,"
+                                     "MES2RTDATA.U_Maker_11020030001.DC_XL,MES2RTDATA.U_Maker_11020030001.DC_TJCS,MES2RTDATA.U_Maker_11020030001.DC_DQBCJSSJ,"
+                                     "MES2RTDATA.U_Maker_11020030001.DC_DQBCKSSJ"
+                                     "||2019-07-5 6:30:00||2019-07-5 10:30:00||Cyclic||600000")
+    df2 = WebSocketHelp.RowToColumn(df, 'TagName', 'vValue', _indexName='DateTime', _havIndex=True)
     print(df2)
     print()
     # dfGroup = WebSocketHelp.DfGroup(df, 'TagName')
     # print(dfGroup)
+
 
 
