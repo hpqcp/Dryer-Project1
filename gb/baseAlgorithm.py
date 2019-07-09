@@ -70,9 +70,10 @@ def findPeaksBySci(_hisData):
 
 #找出每个班次的开始结束区间
 #_lsShift : 传入班次List
-def shiftSection(_lsShifts):
-    ls1 = _lsShifts
-    r1 = _lsShifts[0]
+def shiftSection(_hisData):
+    lsShift = _hisData.values[:,1]
+    ls1 = lsShift
+    r1  = lsShift[0]
     loc=0
     ls2=list()
     for i in range(0,len(ls1) - 1,1):
@@ -85,10 +86,35 @@ def shiftSection(_lsShifts):
     ls2.append([r1,loc,len(ls1) - 1])
     df = pd.DataFrame(ls2)
     df.rename(columns={0: 'Shfit', 1: 'ShiftBegin', 2: 'ShiftEnd'}, inplace=True)
+    df['BeginTime'] = _hisData.values[df.values[:,1].astype(np.int),0]
+    df['EndTime'] = _hisData.values[df.values[:, 2].astype(np.int), 0]
     return df
 
 
 
+#计算生产时段
+#_threshold 临界值
+def wavePorcess_productionSection(_hisData,_threshold):
+    hisData1= _hisData
+    values1 = hisData1.loc[hisData1['cl'].astype(np.int) <= _threshold]  #获取小于临界的值
+    df2 = continuousSegmentByIndex(values1.index)
+    values3 = hisData1.loc[hisData1['cl'].astype(np.int) > _threshold]   #获取大于临界的值
+    df3 =  continuousSegmentByIndex(values3.index)
+    df1 = df2.append(df3)  #合并
+    df1.sort_values(by = ['BeginIndex'],ascending = True,inplace=True)  #排序
+    df1.reset_index(drop=True,inplace=True)
+
+    df1['StartTime'] = hisData1.iloc[df1.iloc[:,0].astype(np.int),0].reset_index(drop=True)
+    df1['EndTime'] = hisData1.iloc[df1.iloc[:, 1].astype(np.int), 0].reset_index(drop=True)
+    minValue = [hisData1.iloc[df1.iloc[i, 0].astype(np.int) : df1.iloc[i, 1].astype(np.int)+1 , 1].astype(np.float).min() for i in range(0,df1.shape[0],1)]
+    minIndex = [np.argmin(hisData1.iloc[df1.iloc[i, 0].astype(np.int) : df1.iloc[i, 1].astype(np.int)+1 , 1].astype(np.float)) for i in range(0,df1.shape[0],1)]
+    maxValue = [hisData1.iloc[df1.iloc[i, 0].astype(np.int): df1.iloc[i, 1].astype(np.int)+1, 1].astype(np.float).max()  for i in range(0, df1.shape[0], 1)]
+    maxIndex = [np.argmax(hisData1.iloc[df1.iloc[i, 0].astype(np.int): df1.iloc[i, 1].astype(np.int)+1, 1].astype(np.float)) for i in range(0, df1.shape[0], 1)]
+    df1['MinValue'] = minValue
+    df1['MinLoc'] = minIndex
+    df1['MaxValue'] = maxValue
+    df1['MaxLoc'] = maxIndex
+    return df1
 
 
 if __name__ == "__main__":
@@ -98,10 +124,10 @@ if __name__ == "__main__":
     # a = shiftTime(str1,str2,str3,"2019-07-02 00:00:00","2019-07-03 06:00:00")
     # print(a)
 
-    freq = "60000"  # 1分钟
-    hisData = pre.loadHisDataByCyclic(["MES2RTDATA.U_Maker_11020030001.DC_YXSD"], freq, "2019-07-06 06:00:00","2019-07-07 06:00:00")
-    a = runHaltIntervalBySpeed(hisData,_type='run')
-    print(a)
+    # freq = "60000"  # 1分钟
+    # hisData = pre.loadHisDataByCyclic(["MES2RTDATA.U_Maker_11020030001.DC_YXSD"], freq, "2019-07-06 06:00:00","2019-07-07 06:00:00")
+    # a = runHaltIntervalBySpeed(hisData,_type='run')
+    # print(a)
 
     # freq = "60000"  # 1min
     # for i in range(1,10,1):
@@ -110,15 +136,34 @@ if __name__ == "__main__":
     #     findPeaksBySci(hisData)
 
     # freq = "60000"  # 1min
-    # #str1 = "MES2RTDATA.U_Maker_11020030001.DC_BC"
+    # str1 = "MES2RTDATA.U_Maker_11020030016.DC_BC"
     # tags=[str1]
-    # hisData = pre.loadHisDataByCyclic(tags, freq, '2019-07-2 00:00:00', '2019-07-3 6:00:00')
-    # a = shiftSection(hisData.values[:,1])
+    # hisData = pre.loadHisDataByCyclic(tags, freq, '2019-06-24 06:00:00', '2019-06-25 6:00:00')
+    # a = shiftSection(hisData)
     # b= list(a.values[:,[1,2]].astype(np.int))
     # print (hisData.values[b,0])
     # print(a)
-    #
-    # tags = ['MES2RTDATA.U_Packer_11020030001.DC_SJCL']
-    # hisData1 = pre.loadHisDataByCyclic(tags, freq, '2019-07-4 6:00:00','2019-07-5 6:00:00')
-    # b = findPeaksBySci(hisData1)
-    # print(hisData1.values[b,0])
+
+    from sklearn.preprocessing import Imputer
+
+
+
+    # freq = "60000"  # 1min
+    # for i in range(16,17,1):
+    #     tags = ['MES2RTDATA.U_Packer_110200300'+str(i)+'.DC_SJCL']
+    #     hisData1 = pre.loadHisDataByFull(tags, freq, '2019-06-24 6:00:00','2019-06-25 6:00:00')
+    #     hisData1.rename(columns={tags[0] : 'cl'}, inplace=True)
+    #     hisData1.loc[hisData1['cl'].astype(np.int) <= 10000,'cl'] = np.nan
+    #     imr = Imputer(missing_values='NaN', strategy='mean', axis=0)  # 均值填充缺失值
+    #     imr = imr.fit(hisData1.drop('DateTime', 1))
+    #     imputed_data = imr.transform(hisData1.drop('DateTime',1).values)
+    #     pyplot.plot(range(0, len(imputed_data), 1), imputed_data, 'r-')
+    #     pyplot.show()
+    #     b = findPeaksBySci(hisData1)
+    #     print(hisData1.values[b,0])
+
+    freq = "60000"  # 1min
+    tags = ['MES2RTDATA.U_Packer_11020030001.DC_SJCL']
+    hisData1 = pre.loadHisDataByCyclic(tags, freq, '2019-07-1 6:00:00', '2019-07-2 6:00:00')
+    hisData1.rename(columns={tags[0]: 'cl'}, inplace=True)
+    wavePorcess_productionSection(hisData1,1000)

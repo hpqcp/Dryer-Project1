@@ -21,6 +21,21 @@ def loadHisDataByCyclic(_tags,_freq,_beginTimeStr,_endTimeStr,_type="vValue"):
     df2 = ws.WebSocketHelp.RowToColumn(df, 'TagName', _type, _indexName='DateTime', _havIndex=True)
     return df2
 
+#以拟合的方式读取HIS数据
+#_tags 点名   _freq 频率
+#type : Value , vVlalue
+def loadHisDataByFull(_tags,_freq,_beginTimeStr,_endTimeStr,_type="vValue"):
+    tagsStr = ""
+    for i in range(0,len(_tags),1):
+        if (i == len(_tags) - 1):
+            tagsStr = tagsStr + _tags[i]
+        else:
+            tagsStr = tagsStr + _tags[i] + ","
+
+    hisStr = tagsStr+"||"+_beginTimeStr+"||"+_endTimeStr+"||Full||"+_freq
+    df = ws.WebSocketHelp.WebSocketJson("ws://10.130.65.207:8181/HisWeb",hisStr)
+    df2 = ws.WebSocketHelp.RowToColumn(df, 'TagName', _type, _indexName='DateTime', _havIndex=True)
+    return df2
 
 
 if __name__ == "__main__":
