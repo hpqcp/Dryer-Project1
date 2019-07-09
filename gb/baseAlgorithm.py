@@ -96,25 +96,45 @@ def shiftSection(_hisData):
 #_threshold 临界值
 def wavePorcess_productionSection(_hisData,_threshold):
     hisData1= _hisData
-    values1 = hisData1.loc[hisData1['cl'].astype(np.int) <= _threshold]  #获取小于临界的值
+    tagName = hisData1.columns[1]
+    hisData1.rename(columns={tagName: 'Speed'}, inplace=True)
+    values1 = hisData1.loc[hisData1['Speed'].astype(np.float) <= _threshold]  #获取小于临界的值
     df2 = continuousSegmentByIndex(values1.index)
-    values3 = hisData1.loc[hisData1['cl'].astype(np.int) > _threshold]   #获取大于临界的值
+    values3 = hisData1.loc[hisData1['Speed'].astype(np.float) > _threshold]   #获取大于临界的值
     df3 =  continuousSegmentByIndex(values3.index)
     df1 = df2.append(df3)  #合并
-    df1.sort_values(by = ['BeginIndex'],ascending = True,inplace=True)  #排序
+    df1.sort_values(by = ['BeginIndex'],ascending = True,inplace=True)  #正排序
     df1.reset_index(drop=True,inplace=True)
-
+    #
+    hisData2 = hisData1.sort_index(axis=0, ascending=False).reset_index(drop=True)
+    #计算指标
     df1['StartTime'] = hisData1.iloc[df1.iloc[:,0].astype(np.int),0].reset_index(drop=True)
     df1['EndTime'] = hisData1.iloc[df1.iloc[:, 1].astype(np.int), 0].reset_index(drop=True)
     minValue = [hisData1.iloc[df1.iloc[i, 0].astype(np.int) : df1.iloc[i, 1].astype(np.int)+1 , 1].astype(np.float).min() for i in range(0,df1.shape[0],1)]
     minIndex = [np.argmin(hisData1.iloc[df1.iloc[i, 0].astype(np.int) : df1.iloc[i, 1].astype(np.int)+1 , 1].astype(np.float)) for i in range(0,df1.shape[0],1)]
     maxValue = [hisData1.iloc[df1.iloc[i, 0].astype(np.int): df1.iloc[i, 1].astype(np.int)+1, 1].astype(np.float).max()  for i in range(0, df1.shape[0], 1)]
     maxIndex = [np.argmax(hisData1.iloc[df1.iloc[i, 0].astype(np.int): df1.iloc[i, 1].astype(np.int)+1, 1].astype(np.float)) for i in range(0, df1.shape[0], 1)]
+    his2Len = hisData2.shape[0]
+    maxIndex2 = list(reversed([his2Len - 1 - np.argmax(hisData2.iloc[his2Len - df1.iloc[i, 1].astype(np.int) - 1: his2Len - df1.iloc[i, 0].astype(np.int), 1].astype(np.float)) for i in range( -1,-df1.shape[0] - 1, -1)]))
+    minIndex2 = list(reversed([his2Len - 1 - np.argmin(
+        hisData2.iloc[his2Len - df1.iloc[i, 1].astype(np.int) - 1: his2Len - df1.iloc[i, 0].astype(np.int), 1].astype(
+            np.float)) for i in range(-1, -df1.shape[0] - 1, -1)]))
+
     df1['MinValue'] = minValue
-    df1['MinLoc'] = minIndex
+    df1['MinLoc1'] = minIndex
+    df1['MinLoc2'] = minIndex2
     df1['MaxValue'] = maxValue
-    df1['MaxLoc'] = maxIndex
+    df1['MaxLoc1'] = maxIndex
+    df1['MaxLoc2'] = maxIndex2
+    df1['MeanSpeed'] = df1.apply(lambda x: x['MaxValue'] / x['Count'], axis=1)
+    df1['Type'] = df1.apply(lambda x: x['MaxValue'] <= _threshold, axis=1)   #类型，True:小于临界  ； False:大于临界
     return df1
+
+
+#
+def wavePorcess_productionSection(_productionSection):
+    if(_productionSection.values[0,'Type']):
+        return  0
 
 
 if __name__ == "__main__":
@@ -163,7 +183,9 @@ if __name__ == "__main__":
     #     print(hisData1.values[b,0])
 
     freq = "60000"  # 1min
+    # tags = ['MES2RTDATA.U_Packer_11020030001.DC_SJCL']DC_TBSJCL
     tags = ['MES2RTDATA.U_Packer_11020030001.DC_SJCL']
     hisData1 = pre.loadHisDataByCyclic(tags, freq, '2019-07-1 6:00:00', '2019-07-2 6:00:00')
-    hisData1.rename(columns={tags[0]: 'cl'}, inplace=True)
+    # hisData1.rename(columns={tags[0]: 'cl'}, inplace=True)
+    # b = findPeaksBySci(hisData1)
     wavePorcess_productionSection(hisData1,1000)
