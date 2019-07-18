@@ -38,10 +38,26 @@ def loadHisDataByFull(_tags,_freq,_beginTimeStr,_endTimeStr,_type="vValue"):
     return df2
 
 
+def plot2Excel(_hisData,_imgPath,_sheet,_x,_y):
+    vector = _hisData.values[:, 1].astype(np.float)
+    indexes, values = sci.find_peaks(vector, height=7, distance=2.1)
+    pyplot.plot(range(0, len(vector), 1), vector, 'r-')
+    y = _hisData.values[indexes, 1].astype('float')
+    pyplot.scatter(indexes, y)
+    pyplot.title = '_title'
+    pyplot.savefig(_imgPath)
+    pyplot.show()
+    # writer = pd.ExcelWriter('savepicture.xlsx', engine='xlsxwriter')
+    # sheet = _write.book.add_worksheet('test')
+    _sheet.insert_image(_x, _y, _imgPath, {'x_scale': 0.6, 'y_scale': 0.6})
+    return 0
+
 if __name__ == "__main__":
     # str = ["MES2RTDATA.U_Maker_11020030001.DC_SJCL","MES2RTDATA.U_Maker_11020030001.DC_BC",
     #        "MES2RTDATA.U_Maker_11020030001.DC_YXSD","MES2RTDATA.U_Maker_11020030001.DC_PH"]
-    str = ["MES2RTDATA.U_Maker_11020030001.DC_BC","MES2RTDATA.U_Maker_11020030001.DC_DQBCJSSJ","MES2RTDATA.U_Maker_11020030001.DC_DQBCKSSJ"]
-    freq = "3600000"
+    # str = ["MES2RTDATA.U_Maker_11020030001.DC_BC","MES2RTDATA.U_Maker_11020030001.DC_DQBCJSSJ","MES2RTDATA.U_Maker_11020030001.DC_DQBCKSSJ"]
+    str = ["MES2RTDATA.U_Maker_11020030001.DC_SJCL"]
+    freq = "6000"
     a = loadHisDataByCyclic(str,freq,"2019-07-01 06:00:00","2019-07-02 06:00:00")
+    plot2Excel(a)
     print(a)
