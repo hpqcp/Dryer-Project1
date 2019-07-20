@@ -185,6 +185,7 @@ def wavePorcess_fillBreakPoint(_hisData,_threshold = 0):
     tagName = hisData1.columns[1]
     hisData1.rename(columns={tagName: 'Product'}, inplace=True)
     values1 = hisData1.loc[hisData1['Product'].astype(np.float) <= _threshold]  # 获取0的值
+    if values1.empty :  return hisData1
     df1 = continuousSegmentByIndex(values1.index)
     if df1.shape[0] <= 0: return hisData1
     for i in range(0,df1.shape[0],1):
