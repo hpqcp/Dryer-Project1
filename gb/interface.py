@@ -34,7 +34,7 @@ if __name__ == "__main__":
     print('Begin : ' + str(datetime.datetime.now()))
     tags=["MES2RTDATA.U_Maker_11020030010.DC_BC","MES2RTDATA.U_Maker_11020030010.DC_PH","MES2RTDATA.U_Maker_11020030010.DC_SJCL","MES2RTDATA.U_Maker_11020030010.DC_YXSD"]
     sTime = "2019-07-02 06:00:00"
-    eTime ="2019-07-03 06:00:00"
+    eTime ="2019-07-03 06:00:00" 
     res,p = GetUnitDayProduction('jj',sTime,eTime,tags)
     print('   End : ' + str(datetime.datetime.now()))
     print(p)
