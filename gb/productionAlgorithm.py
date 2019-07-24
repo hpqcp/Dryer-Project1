@@ -2,6 +2,8 @@ import gb.baseAlgorithm as baseAlg
 import gb.preProcess as pre
 import pandas as pd
 import numpy as np
+import os
+import datetime
 
 
 #计算卷包机
@@ -67,9 +69,15 @@ def GeneralProductionalAlgorithm(_shiftTag,_phTag,_yieldsTag,_speedTag,_beginTim
     if peeks.size <= 0  :
         noProduct[2] = 1  #未找到拐点， 可能全天未开机
         noProductCount = noProductCount + 1
+    if peeks.size <= 1:
+        return False, None
+    #4 .判断是否大于临界值的个数,如果小于1000，则认为未开机
+    lessThresholdCount = hisData3[hisData3['Product'].values.astype(np.float) >= _threshold]
+    if lessThresholdCount.empty | lessThresholdCount.shape[0] < 1000:
+        return False, None
     #4.2个以上判断条件都为可能未开机，则表示当天未开机
-    if noProductCount  >= 2 :
-        return False,None
+    if noProductCount  >= 1  :
+        return False, None
 
     #5.
     pSec1 = baseAlg.wavePorcess_productionSection(hisData3, _threshold)
@@ -134,11 +142,11 @@ def dayProduction2Excel(_excelData,_strSet,_excelWriter,_startTime,_endTime,):
     tbProduction.to_excel(write, startrow=30, sheet_name=_strSet)
     sheet1 = write.book.sheetnames[_strSet]
     if jjHis is not None :
-        pre.plot2Excel(jjHis, "d://jb//1//1.png", sheet1, 0, 14)
+        pre.plot2Excel(jjHis, "d://jb//img//1.png", sheet1, 0, 14)
     if xbHis is not None:
-        pre.plot2Excel(xbHis, "d://jb//1//2.png", sheet1, 16, 14)
+        pre.plot2Excel(xbHis, "d://jb//img//2.png", sheet1, 16, 14)
     if tbHis is not None:
-        pre.plot2Excel(tbHis, "d://jb//1//3.png", sheet1, 31, 14)
+        pre.plot2Excel(tbHis, "d://jb//img//3.png", sheet1, 31, 14)
     return write
 
 
@@ -188,23 +196,32 @@ if __name__ == "__main__":
     # # book = load_workbook(write.path)
     # # write.book = book
     # # sheet1 = book['1#']
-    import datetime
-    jbData = pd.read_excel("d://jb//jb.xlsx", sheet_name='ky', header=0)
-    # setData = jbData.iloc[jbData['set'].values == '1#',:]
-    sTime = "2019-07-02 06:00:00"
-    eTime = "2019-07-03 06:00:00"
+    strDir = "d://jb//"
 
+    jbData = pd.read_excel(strDir+"jb.xlsx", sheet_name='ky', header=0)
+    # setData = jbData.iloc[jbData['set'].values == '1#',:]
     setData = jbData.drop_duplicates(['set'])
-    setData1 = setData.dropna(axis = 0 ,how='any')
+    setData1 = setData.dropna(axis=0, how='any')
     setData = setData1.reset_index(drop=True)
-    for i in range(0,setData.shape[0],1):
-        print('Begin process : '+str(i)+'   timestamp : '+str(datetime.datetime.now()))
-        setNo = setData['set'].values[i]
-        write = pd.ExcelWriter("d://jb//2//"+setNo+".xlsx", engine='xlsxwriter')
-        write = dayProduction2Excel(jbData,setNo,write,sTime,eTime)
-        print('Complete : ' + str(i)+'   timestamp : '+str(datetime.datetime.now()))
-    # write1 = dayProduction2Excel(jbData, '2#', write1, sTime, eTime)
-        write.save()
-        write.close()
+    strDates = ['1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19']
+    #strDates = [ '15','16','17','18','19','15', '16', '17', '18', '19']
+    # for j in range(0,len(strDates),1):
+    for j in range(31, setData.shape[0],1):
+        setNo = setData['set'].values[j]
+        # if not os.path.exists(strDir + strDates[j]) :
+        if not os.path.exists(strDir + setNo):
+            os.mkdir(strDir + setNo)
+        # for i in range(1,2,1):#setData.shape[0],1):
+        for i in range(14, len(strDates),1):
+            sTime = "2019-07-" + strDates[i] + " 05:00:00"
+            eTime = "2019-07-" + str(int(strDates[i]) + 1) + " 05:00:00"
+            print('Begin process : '+str(datetime.datetime.now())+'    Set : '+setNo+'    Date : '+strDates[i])
+            # setNo = setData['set'].values[i]
+            write = pd.ExcelWriter(strDir+setNo+"//"+strDates[i]+".xlsx", engine='xlsxwriter')
+            write = dayProduction2Excel(jbData,setNo,write,sTime,eTime)
+            print('     Complete : '+str(datetime.datetime.now()))
+        # write1 = dayProduction2Excel(jbData, '2#', write1, sTime, eTime)
+            write.save()
+            write.close()
 
     print('')

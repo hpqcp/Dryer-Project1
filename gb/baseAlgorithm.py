@@ -110,9 +110,11 @@ def wavePorcess_productionSection(_hisData,_threshold):
     tagName = hisData1.columns[1]
     hisData1.rename(columns={tagName: 'Speed'}, inplace=True)
     values1 = hisData1.loc[hisData1['Speed'].astype(np.float) <= _threshold]  #获取小于临界的值
-    df2 = continuousSegmentByIndex(values1.index)
+    if values1.empty  :     df2 = None
+    else :  df2 = continuousSegmentByIndex(values1.index)
     values3 = hisData1.loc[hisData1['Speed'].astype(np.float) > _threshold]   #获取大于临界的值
-    df3 =  continuousSegmentByIndex(values3.index)
+    if values3.empty :      df3 = None
+    else :  df3 =  continuousSegmentByIndex(values3.index)
     df1 = df2.append(df3)  #合并
     df1.sort_values(by = ['BeginIndex'],ascending = True,inplace=True)  #正排序
     df1.reset_index(drop=True,inplace=True)
