@@ -3,7 +3,10 @@ import gb.productionAlgorithm as pAlgorithm
 import pandas as pd
 
 #获取卷包单元（卷接、小包、条包、提升机等）日产量信息
-#   _type : 单元类型 string , 'jj' : 卷接 ,'xb' :小包 , 'tb' : 条包
+#        _type : 单元类型, string , 'jj' : 卷接 ,'xb' :小包 , 'tb' : 条包
+#   _startTime : 开始时间, string   example: '2019-07-02 06:00:00'
+#     _endTime : 时间, string
+#        _tags : tag地址 , list  , example: ["MES2RTDATA.U_Maker_11020030010.DC_BC","MES2RTDATA.U_Maker_11020030010.DC_PH","MES2RTDATA.U_Maker_11020030010.DC_SJCL","MES2RTDATA.U_Maker_11020030010.DC_YXSD"]
 def GetUnitDayProduction(_type , _startTime , _endTime , _tags):
     #1 . 判断参数_type
     if _type == 'jj' :
@@ -34,7 +37,7 @@ if __name__ == "__main__":
     print('Begin : ' + str(datetime.datetime.now()))
     tags=["MES2RTDATA.U_Maker_11020030010.DC_BC","MES2RTDATA.U_Maker_11020030010.DC_PH","MES2RTDATA.U_Maker_11020030010.DC_SJCL","MES2RTDATA.U_Maker_11020030010.DC_YXSD"]
     sTime = "2019-07-02 06:00:00"
-    eTime ="2019-07-03 06:00:00" 
+    eTime ="2019-07-03 06:00:00"
     res,p = GetUnitDayProduction('jj',sTime,eTime,tags)
     print('   End : ' + str(datetime.datetime.now()))
     print(p)
