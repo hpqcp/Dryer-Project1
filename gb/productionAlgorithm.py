@@ -64,6 +64,11 @@ def GeneralProductionalAlgorithm(_shiftTag,_phTag,_yieldsTag,_speedTag,_beginTim
     hisData3 = pre.loadHisDataByCyclic(tags3, freq, _beginTime, _endTime)
     if (hisData3.empty):
         return True,["-301","GeneralProductionalAlgorithm","数据为空！"]
+    ######曲烟数据存在NULL值，且为字符型，在此判断NULL比率，超过20%，则不进行后续计算     2019-7-26
+    nullCount = hisData3[hisData3.values[:,1] == 'NULL'].shape[0]
+    if (nullCount / hisData3.shape[0] > 0.8) :
+        return True, ["-302", "GeneralProductionalAlgorithm", "NULL值过多！ NULL比率：" + str(nullCount / hisData3.shape[0])]
+    ###############################
     hisData3 = baseAlg.wavePorcess_fillBreakPoint(hisData3, _threshold/4)
     peeks = baseAlg.findPeaksBySci(hisData3)
     if peeks.size <= 0  :
@@ -76,7 +81,7 @@ def GeneralProductionalAlgorithm(_shiftTag,_phTag,_yieldsTag,_speedTag,_beginTim
     if lessThresholdCount.empty | lessThresholdCount.shape[0] < 1000:
         return False, None
     #4.2个以上判断条件都为可能未开机，则表示当天未开机
-    if noProductCount  >= 1  :
+    if noProductCount  >= 2  :
         return False, None
 
     #5.
@@ -88,6 +93,9 @@ def GeneralProductionalAlgorithm(_shiftTag,_phTag,_yieldsTag,_speedTag,_beginTim
 
 #
 def dayProduction2Excel(_excelData,_strSet,_excelWriter,_startTime,_endTime,):
+    jjHis = None
+    xbHis = None
+    tbHis = None
     setData = _excelData.iloc[jbData['set'].values == _strSet,:]
     sTime = _startTime
     eTime = _endTime
@@ -198,7 +206,7 @@ if __name__ == "__main__":
     # # sheet1 = book['1#']
     strDir = "d://jb//"
 
-    jbData = pd.read_excel(strDir+"jb.xlsx", sheet_name='ky', header=0)
+    jbData = pd.read_excel(strDir+"ky.xlsx", sheet_name='qy', header=0)
     # setData = jbData.iloc[jbData['set'].values == '1#',:]
     setData = jbData.drop_duplicates(['set'])
     setData1 = setData.dropna(axis=0, how='any')
@@ -206,15 +214,15 @@ if __name__ == "__main__":
     strDates = ['1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19']
     #strDates = [ '15','16','17','18','19','15', '16', '17', '18', '19']
     # for j in range(0,len(strDates),1):
-    for j in range(31, setData.shape[0],1):
+    for j in range(1, setData.shape[0],1):
         setNo = setData['set'].values[j]
         # if not os.path.exists(strDir + strDates[j]) :
         if not os.path.exists(strDir + setNo):
             os.mkdir(strDir + setNo)
         # for i in range(1,2,1):#setData.shape[0],1):
-        for i in range(14, len(strDates),1):
-            sTime = "2019-07-" + strDates[i] + " 05:00:00"
-            eTime = "2019-07-" + str(int(strDates[i]) + 1) + " 05:00:00"
+        for i in range(0, len(strDates),1):
+            sTime = "2019-07-" + strDates[i] + " 04:00:00"
+            eTime = "2019-07-" + str(int(strDates[i]) + 1) + " 04:00:00"
             print('Begin process : '+str(datetime.datetime.now())+'    Set : '+setNo+'    Date : '+strDates[i])
             # setNo = setData['set'].values[i]
             write = pd.ExcelWriter(strDir+setNo+"//"+strDates[i]+".xlsx", engine='xlsxwriter')

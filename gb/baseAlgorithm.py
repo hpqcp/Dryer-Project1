@@ -177,7 +177,7 @@ def wavePorcess_productionCompute(_productionSection):
     df1['EndTime'] = data1['MaxTime1'].values[range2].astype(np.datetime64)
     df1['Interval'] = df1.apply(lambda x: (x['EndTime'] - x['StartTime']).total_seconds()/60 , axis=1)
     df1['Product'] = data1['MaxValue'].values[range2]
-    df1['MeanSpeed'] = df1.apply(lambda x: x['Product'] / x['Count'], axis=1)
+    df1['MeanSpeed'] = df1.apply(lambda x: x['Product'] / x['Interval'], axis=1)
     return  df1
 
 #填充断点
