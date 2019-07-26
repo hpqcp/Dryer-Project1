@@ -2,7 +2,7 @@ from flask import Flask
 from flask import request
 import json
 import JC.jc_predict as jc_pre
-
+import gb.interface as gb_ine
 app = Flask(__name__)
 
 
@@ -61,5 +61,30 @@ def jcCon():
         result = json.dumps(msg)
         return result
 
+#gb
+@app.route('/gb')
+def GetUnitDayProduction():
+    try:
+        _type = request.args.get('_type')
+        _startTime = request.args.get('type')
+        _endTime = request.args.get('_type')
+        _tags = request.args.get('type')
+        resultData = gb_ine.GetUnitDayProduction(_type , _startTime , _endTime , _tags)
+        #True, ['-101', 'GetUnitDayProduction', '参数_type没有传入已知的类型！']
+    except Exception:
+        msg = '{"code":2,"msg":"操作异常!",address:"app",errCode:"-79"}'
+        result = json.dumps(msg)
+        return result
+    else:
+        if (resultData[0] == True):
+            msg = '{"code":2,"msg":"' + (resultData[1])[2] + '",address:"' + (resultData[1])[1] + '",errCode:"' + \
+                  (resultData[1])[0] + '"}'
+            result = json.dumps(msg)
+            return result
+        else:
+            msg = '{"code":2,"msg":"' + (resultData[1])[2] + '",address:"' + (resultData[1])[1] + '",errCode:"' + \
+                  (resultData[1])[0] + '"}'
+            result = json.dumps(msg)
+            return result
 if __name__ == '__main__':
     app.run()
