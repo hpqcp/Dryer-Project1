@@ -15,9 +15,9 @@ def GetUnitDayProduction(_type , _startTime , _endTime , _tags):
     if _type == 'jj' :
         threshold = 5000     #临界值，根据单元类型不同，赋予不同数值
     elif _type == 'xb'   :
-        threshold = 300
+        threshold = 500
     elif _type == 'tb'   :
-        threshold = 50
+        threshold = 80
     else :
         return True,['-101','GetUnitDayProduction','参数_type没有传入已知的类型！']
     #2 . 准备
@@ -33,6 +33,8 @@ def GetUnitDayProduction(_type , _startTime , _endTime , _tags):
         return True,['0','GetUnitDayProduction','本日未开机！']
     else:
         return res , Production
+
+
 
 
 if __name__ == "__main__":

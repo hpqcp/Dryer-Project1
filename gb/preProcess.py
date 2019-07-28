@@ -39,10 +39,12 @@ def loadHisDataByFull(_tags,_freq,_beginTimeStr,_endTimeStr,_type="vValue"):
 
 
 def plot2Excel(_hisData,_imgPath,_sheet,_x,_y):
-    vector = _hisData.values[:, 1].astype(np.float)
+    hisData = _hisData
+    hisData.replace('NULL', '0', inplace=True)
+    vector = hisData.values[:, 1].astype(np.float)
     indexes, values = sci.find_peaks(vector, height=7, distance=2.1)
     pyplot.plot(range(0, len(vector), 1), vector, 'r-')
-    y = _hisData.values[indexes, 1].astype('float')
+    y = hisData.values[indexes, 1].astype('float')
     pyplot.scatter(indexes, y)
     pyplot.title = '_title'
     pyplot.savefig(_imgPath)
