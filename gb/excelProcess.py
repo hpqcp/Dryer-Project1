@@ -16,7 +16,7 @@ def DayProductionByExcelFactory(_dir,_excelName,_sheetName,_startTime,_endTime) 
     eTime = _endTime
     if not os.path.exists(_dir+productDate):
         os.mkdir(_dir+productDate)
-    for j in range(0, setData.shape[0], 1):
+    for j in range(5, setData.shape[0], 1):
         setNo = setData['set'].values[j]
         print(
             'Begin process : ' + str(datetime.datetime.now()) + '    Set : ' + setNo + '    Date : ' + productDate)
@@ -62,17 +62,18 @@ if __name__ == "__main__":
     dir = "d://jb//hz//"
     excelStr = 'hz.xlsx'
     sheetName = 'hz'
-    sTime = '2019-1-1 05:00:00'
-    eTime = '2019-7-19 05:00:00'
+    sTime = '2019-7-2 05:00:00'
+    eTime = '2019-7-3 05:00:00'
 
-    excelName = dir + excelStr
-    jbData = pd.read_excel(excelName, sheet_name=sheetName, header=0)
-    setData = jbData.drop_duplicates(['set'])
-    setData1 = setData.dropna(axis=0, how='any')
-    setData2 = setData1.reset_index(drop=True)
-    for i in range(0,setData2.shape[0],1) :
+    # excelName = dir + excelStr
+    # jbData = pd.read_excel(excelName, sheet_name=sheetName, header=0)
+    # setData = jbData.drop_duplicates(['set'])
+    # setData1 = setData.dropna(axis=0, how='any')
+    # setData2 = setData1.reset_index(drop=True)
+    # for i in range(0,setData2.shape[0],1) :
+    #
+    #     strSet = setData['set'].values[i]
+    #     excel2Plot(dir, excelStr, sheetName, sTime, eTime,strSet,_isSave=True)
 
-        strSet = setData['set'].values[i]
-        #DayProductionByExcelFactory(dir,excelStr,sheetName,sTime,eTime)
-        excel2Plot(dir, excelStr, sheetName, sTime, eTime,strSet,_isSave=True)
+    DayProductionByExcelFactory(dir,excelStr,sheetName,sTime,eTime)
     print('1')
