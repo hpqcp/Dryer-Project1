@@ -38,7 +38,7 @@ def loadHisDataByFull(_tags,_freq,_beginTimeStr,_endTimeStr,_type="vValue"):
     return df2
 
 
-def plot2Excel(_hisData,_imgPath,_sheet,_x,_y):
+def plot2Excel(_hisData,_imgPath,_sheet,_x,_y,_title=''):
     hisData = _hisData
     hisData.replace('NULL', '0', inplace=True)
     vector = hisData.values[:, 1].astype(np.float)
@@ -46,7 +46,7 @@ def plot2Excel(_hisData,_imgPath,_sheet,_x,_y):
     pyplot.plot(range(0, len(vector), 1), vector, 'r-')
     y = hisData.values[indexes, 1].astype('float')
     pyplot.scatter(indexes, y)
-    pyplot.title = '_title'
+    pyplot.title = _title
     pyplot.savefig(_imgPath)
     pyplot.show()
     # writer = pd.ExcelWriter('savepicture.xlsx', engine='xlsxwriter')

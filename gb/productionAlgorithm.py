@@ -165,6 +165,7 @@ def dayProduction2Excel(_excelData,_strSet,_excelWriter,_startTime,_endTime,):
     tbProduction.to_excel(write, startrow=30, sheet_name=_strSet)
     sheet1 = write.book.sheetnames[_strSet]
     if jjHis is not None :
+        # title = _strSet + ' ' + strUnit + ' ' + sTime + ' - ' + eTime + ' 频率:24H' + '\n' + clTag
         pre.plot2Excel(jjHis, "d://jb//img//1.png", sheet1, 0, 14)
     if xbHis is not None:
         pre.plot2Excel(xbHis, "d://jb//img//2.png", sheet1, 16, 14)
