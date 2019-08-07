@@ -152,26 +152,25 @@ def wavePorcess_productionSection(_hisData,_threshold):
 def wavePorcess_productionCompute(_productionSection):
     data1 = _productionSection
     isLast = False
+    df1 = pd.DataFrame()
+
     if(data1['Type'].values[0]==False):
         data1.drop(index=[0],inplace=True)
         data1.reset_index(drop=True,inplace=True)
     len = data1.shape[0]
 
-    if (len % 2) == 0:
+    if len == 1 :
+        return None
+    elif (len % 2) == 0:
         range1 = range(0, len, 2)
         range2 = range(1,len+1,2)
     else:
         range1 = range(0, len - 1, 2)
         range2 = range(1, len - 1 , 2)
         isLast = True
-    df1 = pd.DataFrame()
 
     df1['StartIndex'] = data1['MinLoc2'].values[range1].astype(np.int)
     df1['EndIndex'] = data1['MaxLoc1'].values[range2].astype(np.int)
-    # if isLast :
-    #     df1['StartIndex'].append(data1['MinLoc2'].values[range1].astype(np.int))
-    #     df1['EndIndex'].append(data1['MaxLoc1'].values[range1].astype(np.int))
-
     df1['Count'] = df1.apply(lambda x: x['EndIndex'] - x['StartIndex'], axis=1)
     df1['StartTime'] = data1['MinTime2'].values[range1].astype(np.datetime64)
     df1['EndTime'] = data1['MaxTime1'].values[range2].astype(np.datetime64)

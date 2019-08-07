@@ -60,9 +60,11 @@ def GeneralProductionalAlgorithm(_shiftTag,_phTag,_yieldsTag,_speedTag,_beginTim
     hisData2 = pre.loadHisDataByCyclic(tags2, freq, _beginTime, _endTime)
     if (hisData2.empty):
         return True, ["-201", "GeneralProductionalAlgorithm", "数据为空！"]
-
+    if (hisData2.shape[1] < 3):        return True, ["-202", "GeneralProductionalAlgorithm",
+                                                     "数据不完整，缺少列！列数：" + str(hisData2.shape[1])]
     nullCount = hisData2[hisData2.values[:, [1,2]] == 'NULL'].shape[0]
-    if nullCount / hisData2.shape[0] > 0.1:
+    naCount = hisData2[hisData2.values[:, [1, 2]] == ''].shape[0]
+    if nullCount / hisData2.shape[0] > 0.1 or naCount / hisData2.shape[0]:
         noProduct[0] = 1  # Null值过多
         noProductCount = noProductCount + 1
     else:
@@ -75,7 +77,7 @@ def GeneralProductionalAlgorithm(_shiftTag,_phTag,_yieldsTag,_speedTag,_beginTim
     ##3.获取产量数据
     tags3 = [_yieldsTag]
     freq = "6000"  # 6s
-    hisData3 = pre.loadHisDataByCyclic(tags3, freq, _beginTime, _endTime)
+    hisData3 = pre.loadHisDataByCyclic(tags3, freq, _beginTime, _endTime,_type='Value')
     if (hisData3.empty):
         return True,["-301","GeneralProductionalAlgorithm","数据为空！"]
     ######曲烟数据存在NULL值，且为字符型，在此判断NULL比率，超过10%，则不进行后续计算     2019-7-26
@@ -89,7 +91,7 @@ def GeneralProductionalAlgorithm(_shiftTag,_phTag,_yieldsTag,_speedTag,_beginTim
     if peeks.size <= 0  :
         noProduct[2] = 1  #未找到拐点， 可能全天未开机
         noProductCount = noProductCount + 1
-    if peeks.size <= 1:
+    if peeks.size < 1:
         return False, None
     #4 .判断是否大于临界值的个数,如果小于1000，则认为未开机
     lessThresholdCount = hisData3[hisData3['Product'].values.astype(np.float) >= _threshold]
@@ -102,12 +104,14 @@ def GeneralProductionalAlgorithm(_shiftTag,_phTag,_yieldsTag,_speedTag,_beginTim
     #5.
     pSec1 = baseAlg.wavePorcess_productionSection(hisData3, _threshold)
     pCompute1 = baseAlg.wavePorcess_productionCompute(pSec1)
+    if pCompute1 is None :
+        return False, None
     productionTable = baseAlg.wavePorcess_shiftPH(hisData2, pCompute1)
     productionTable1 = baseAlg.appenTotalRow(productionTable)
     return False,productionTable1
 
 #
-def dayProduction2Excel(_excelData,_strSet,_excelWriter,_startTime,_endTime,):
+def dayProduction2Excel(_excelData,_strSet,_excelWriter,_startTime,_endTime,_path):
     jjHis = None
     xbHis = None
     tbHis = None
@@ -120,15 +124,10 @@ def dayProduction2Excel(_excelData,_strSet,_excelWriter,_startTime,_endTime,):
         phTag = setData['ph'].values[i]
         clTag = setData['cl'].values[i]
         sdTag = setData['sd'].values[i]
-        # a = setData['bc'].isna().where(True)
-        # if  str(bcTag).isspace():
-        #     jjProduction = pd.DataFrame(['数采点地址为空！'],columns=['描述'])
-        #     xbProduction = jjProduction
-        #     tbProduction = jjProduction
-        #     jjHis,xbHis,tbHis = None,None,None
-        #     break;
+
         if setData['unit'].values[i] == '卷接' :
             threshold = 5000
+            jjTitle = _strSet + ' ' + setData['unit'].values[i] + ' ' + sTime + ' - ' + eTime + ' 频率:6s' + '\n' + clTag
             res,jjProduction = GeneralProductionalAlgorithm(bcTag,phTag,clTag,sdTag,sTime,eTime,threshold)
             if res :
                 jjProduction = pd.DataFrame(jjProduction)
@@ -140,6 +139,7 @@ def dayProduction2Excel(_excelData,_strSet,_excelWriter,_startTime,_endTime,):
                 jjHis = pre.loadHisDataByCyclic([clTag], '6000', sTime, eTime)
         elif setData['unit'].values[i] == '小包' :
             threshold = 500
+            xbTitle = _strSet + ' ' + setData['unit'].values[i] + ' ' + sTime + ' - ' + eTime + ' 频率:6s' + '\n' + clTag
             res,xbProduction = GeneralProductionalAlgorithm(bcTag,phTag,clTag,sdTag,sTime,eTime,threshold)
             if res :
                 xbProduction = pd.DataFrame(xbProduction)
@@ -151,6 +151,7 @@ def dayProduction2Excel(_excelData,_strSet,_excelWriter,_startTime,_endTime,):
                 xbHis = pre.loadHisDataByCyclic([clTag], '6000', sTime, eTime)
         elif setData['unit'].values[i] == '条包' :
             threshold = 100
+            tbTitle = _strSet + ' ' + setData['unit'].values[i] + ' ' + sTime + ' - ' + eTime + ' 频率:6s' + '\n' + clTag
             res,tbProduction = GeneralProductionalAlgorithm(bcTag,phTag,clTag,sdTag,sTime,eTime,threshold)
             if res :
                 tbProduction = pd.DataFrame(tbProduction)
@@ -165,12 +166,11 @@ def dayProduction2Excel(_excelData,_strSet,_excelWriter,_startTime,_endTime,):
     tbProduction.to_excel(write, startrow=30, sheet_name=_strSet)
     sheet1 = write.book.sheetnames[_strSet]
     if jjHis is not None :
-        # title = _strSet + ' ' + strUnit + ' ' + sTime + ' - ' + eTime + ' 频率:24H' + '\n' + clTag
-        pre.plot2Excel(jjHis, "d://jb//img//1.png", sheet1, 0, 14)
+        pre.plot2Excel(jjHis, _path+"1.png", sheet1, 0, 14,_title=jjTitle)
     if xbHis is not None:
-        pre.plot2Excel(xbHis, "d://jb//img//2.png", sheet1, 16, 14)
+        pre.plot2Excel(xbHis, _path+"2.png", sheet1, 16, 14,_title=xbTitle)
     if tbHis is not None:
-        pre.plot2Excel(tbHis, "d://jb//img//3.png", sheet1, 31, 14)
+        pre.plot2Excel(tbHis, _path+"3.png", sheet1, 31, 14,_title=tbTitle)
     return write
 
 

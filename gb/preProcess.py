@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 import scipy.signal as sci
 import matplotlib.pyplot as pyplot
+from matplotlib.font_manager import FontProperties
 
 #以拟合的方式读取HIS数据
 #_tags 点名   _freq 频率
@@ -46,11 +47,14 @@ def plot2Excel(_hisData,_imgPath,_sheet,_x,_y,_title=''):
     pyplot.plot(range(0, len(vector), 1), vector, 'r-')
     y = hisData.values[indexes, 1].astype('float')
     pyplot.scatter(indexes, y)
-    pyplot.title = _title
+    font_set = FontProperties(fname=r"c:\windows\fonts\simsun.ttc", size=10)
+    pyplot.title(_title, fontproperties=font_set)
     pyplot.savefig(_imgPath)
-    pyplot.show()
+    #pyplot.show()
+    pyplot.close()
     # writer = pd.ExcelWriter('savepicture.xlsx', engine='xlsxwriter')
     # sheet = _write.book.add_worksheet('test')
+
     _sheet.insert_image(_x, _y, _imgPath, {'x_scale': 0.6, 'y_scale': 0.6})
     return 0
 
