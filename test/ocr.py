@@ -1,7 +1,7 @@
 import pytesseract
-import PIL.Image as Images
+from PIL import Image
 
-image = Images.open('C:\\Users\\hpqcp\\Picturestest.png')
+image = Image.open('C:\\Users\\hpqcp\\Picturestest.png')
 code = pytesseract.image_to_string(image)
 print(code)
 

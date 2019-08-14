@@ -35,4 +35,4 @@ if __name__ == "__main__":
     # deltailInfo = [[ "d://jb//ky//",'ky.xlsx','ky'],["d://jb//hy//",'hy.xlsx','Sheet1'],[ "d://jb//qy//",'qy.xlsx','Sheet1'], \
     #     ["d://jb//hz//", 'hz.xlsx', 'hz'], ["d://jb//xj//", 'xj.xlsx', 'xj'], ["d://jb//wl//", 'wl.xlsx', 'wl']]
     deltailInfo =[["d://jb//xj//", 'xj.xlsx', 'xj']]
-    everyDayJob(_factoryInfo=deltailInfo,_productDate='2019-8-5')
+    everyDayJob(_factoryInfo=deltailInfo,_productDate='2019-8-7',_startTime='10:00:00',_endTime='10:00:00')

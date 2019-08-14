@@ -69,8 +69,9 @@ def zsExcel2Plot(_tagName,_startTime,_endTime,_strSet,_isSave=False,_imgPath='')
     sTime = _startTime
     eTime = _endTime
     clTag = _tagName
-    hisData = pre.loadHisDataByCyclic([clTag], '600000', sTime, eTime,_type='Value')
-
+    hisData = pre.loadHisDataByCyclic([clTag], '3600000', sTime, eTime,_type='Value')
+    if hisData.empty :
+        return
     vector = hisData.values[:, 1].astype(np.float)
     indexes, values = sci.find_peaks(vector, height=7, distance=2.1)
     pyplot.plot(range(0, len(vector), 1), vector, 'r-')
@@ -86,6 +87,7 @@ def zsExcel2Plot(_tagName,_startTime,_endTime,_strSet,_isSave=False,_imgPath='')
     pyplot.close()
 
 
+
 def multivValue2Excel(_taglist,_tagNames,_startTime,_endTime,_path):
     sTime = _startTime
     eTime = _endTime
@@ -96,11 +98,11 @@ def multivValue2Excel(_taglist,_tagNames,_startTime,_endTime,_path):
     hisData.to_excel(write)
 
 if __name__ == "__main__":
-    dir = "d://jb//zs//"
-    excelStr = 'kyzs.xlsx'
+    dir = "d://jb//tsj//"
+    excelStr = 'tsjwl.xlsx'
     sheetName = 'Sheet1'
-    sTime = '2019-8-1 06:00:00'
-    eTime = '2019-8-3 06:00:00'
+    sTime = '2019-7-1 06:00:00'
+    eTime = '2019-7-19 06:00:00'
 
     # excelName = dir + excelStr
     # jbData = pd.read_excel(excelName, sheet_name=sheetName, header=0)
@@ -122,10 +124,21 @@ if __name__ == "__main__":
     #     tagStr =  jbData1.values[i,2]
     #     zsExcel2Plot(tagStr, sTime, eTime,strSet,_isSave=True,_imgPath=dir)
 
-    excelName = dir + excelStr
-    jbData = pd.read_excel(excelName, sheet_name='Sheet2', header=0)
-    jbData1 = jbData.set_index('单元').stack().reset_index()
-    tags = list(jbData1.values[:,2])
-    names = list(jbData1.values[:,0]+'-'+jbData1.values[:,1])
-    multivValue2Excel([tags[0]],names,sTime, eTime,dir+'vValue.xlsx')
+    # excelName = dir + excelStr
+    # jbData = pd.read_excel(excelName, sheet_name='Sheet2', header=0)
+    # jbData1 = jbData.set_index('单元').stack().reset_index()
+    # tags = list(jbData1.values[:,2])
+    # names = list(jbData1.values[:,0]+'-'+jbData1.values[:,1])
+    # multivValue2Excel([tags[0]],names,sTime, eTime,dir+'vValue.xlsx')
+
+
+    # excelName = dir + excelStr
+    # jbData = pd.read_excel(excelName, sheet_name=sheetName, header=0)
+    # jbData1 =  jbData.dropna(axis=0, how='any')
+    # jbData1 = jbData1.reset_index(drop=True)
+    #
+    # for i in range(0,jbData1.shape[0],1) :
+    #     strSet = jbData1.values[i,0] +'-'+jbData1.values[i,1]
+    #     tagStr =  jbData1.values[i,3]
+    #     zsExcel2Plot(tagStr, sTime, eTime,strSet,_isSave=True,_imgPath=dir)
     print('1')
