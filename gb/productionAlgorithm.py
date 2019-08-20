@@ -6,6 +6,44 @@ import os
 import datetime
 
 
+
+#简要计算卷包机、提升机
+#_threshold:临界值
+def SimpleProductionalAlgorithm(_yieldsTag,_beginTime,_endTime,_threshold):
+    ##3.获取产量数据
+    tags3 = [_yieldsTag]
+    freq = "6000"  # 6s
+    hisData3 = pre.loadHisDataByCyclic(tags3, freq, _beginTime, _endTime, _type='Value')
+    if (hisData3.empty):
+        return True, ["-301", "GeneralProductionalAlgorithm", "数据为空！"]
+    # ######曲烟数据存在NULL值，且为字符型，在此判断NULL比率，超过10%，则不进行后续计算     2019-7-26
+    # nullCount = hisData3[hisData3.values[:, 1] == 'NULL'].shape[0]
+    # if (nullCount / hisData3.shape[0] > 0.1):
+    #     return True, ["-302", "GeneralProductionalAlgorithm", "NULL值过多！ NULL比率：" + str(nullCount / hisData3.shape[0])]
+    # hisData3.replace('NULL', '0', inplace=True)  # 用 0 填充NULL
+    # ###############################
+    hisData3 = baseAlg.wavePorcess_fillBreakPoint(hisData3, _threshold / 4)
+    peeks = baseAlg.findPeaksBySci(hisData3)
+    if peeks.size < 1:
+        return False, None
+    # 4 .判断是否大于临界值的个数,如果小于1000，则认为未开机
+    lessThresholdCount = hisData3[hisData3['Product'].values.astype(np.float) >= _threshold]
+    if lessThresholdCount.empty | lessThresholdCount.shape[0] < 1000:
+        return False, None
+
+    # 5.
+    pSec1 = baseAlg.wavePorcess_productionSection(hisData3, _threshold)
+    pCompute1 = baseAlg.wavePorcess_productionCompute(pSec1)
+    if pCompute1 is None:
+        return False, None
+    # productionTable = baseAlg.wavePorcess_shiftPH(hisData2, pCompute1)
+    # productionTable1 = baseAlg.appenTotalRow(productionTable)
+    return False, pCompute1
+
+
+
+
+
 #计算卷包机
 #_threshold:临界值
 def GeneralProductionalAlgorithm(_shiftTag,_phTag,_yieldsTag,_speedTag,_beginTime,_endTime,_threshold):
@@ -222,30 +260,34 @@ if __name__ == "__main__":
     # # sheet1 = book['1#']
     strDir = "d://jb//"
 
-    jbData = pd.read_excel(strDir+"hy.xlsx", sheet_name='Sheet1', header=0)
-    # setData = jbData.iloc[jbData['set'].values == '1#',:]
-    setData = jbData.drop_duplicates(['set'])
-    setData1 = setData.dropna(axis=0, how='any')
-    setData = setData1.reset_index(drop=True)
-    strDates = ['1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19']
-    #strDates = [ '15','16','17','18','19','15', '16', '17', '18', '19']
-    # for j in range(0,len(strDates),1):
-    for j in range(2, setData.shape[0],1):
-        setNo = setData['set'].values[j]
-        # if not os.path.exists(strDir + strDates[j]) :
-        if not os.path.exists(strDir + setNo):
-            os.mkdir(strDir + setNo)
-        # for i in range(1,2,1):#setData.shape[0],1):
-        for i in range(1, len(strDates),1):
-            sTime = "2019-07-" + strDates[i] + " 04:00:00"
-            eTime = "2019-07-" + str(int(strDates[i]) + 1) + " 08:30:00"
-            print('Begin process : '+str(datetime.datetime.now())+'    Set : '+setNo+'    Date : '+strDates[i])
-            # setNo = setData['set'].values[i]
-            write = pd.ExcelWriter(strDir+setNo+"//"+strDates[i]+".xlsx", engine='xlsxwriter')
-            write = dayProduction2Excel(jbData,setNo,write,sTime,eTime)
-            print('     Complete : '+str(datetime.datetime.now()))
-        # write1 = dayProduction2Excel(jbData, '2#', write1, sTime, eTime)
-            write.save()
-            write.close()
+    # jbData = pd.read_excel(strDir+"hy.xlsx", sheet_name='Sheet1', header=0)
+    # # setData = jbData.iloc[jbData['set'].values == '1#',:]
+    # setData = jbData.drop_duplicates(['set'])
+    # setData1 = setData.dropna(axis=0, how='any')
+    # setData = setData1.reset_index(drop=True)
+    # strDates = ['1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19']
+    # #strDates = [ '15','16','17','18','19','15', '16', '17', '18', '19']
+    # # for j in range(0,len(strDates),1):
+    # for j in range(2, setData.shape[0],1):
+    #     setNo = setData['set'].values[j]
+    #     # if not os.path.exists(strDir + strDates[j]) :
+    #     if not os.path.exists(strDir + setNo):
+    #         os.mkdir(strDir + setNo)
+    #     # for i in range(1,2,1):#setData.shape[0],1):
+    #     for i in range(1, len(strDates),1):
+    #         sTime = "2019-07-" + strDates[i] + " 04:00:00"
+    #         eTime = "2019-07-" + str(int(strDates[i]) + 1) + " 08:30:00"
+    #         print('Begin process : '+str(datetime.datetime.now())+'    Set : '+setNo+'    Date : '+strDates[i])
+    #         # setNo = setData['set'].values[i]
+    #         write = pd.ExcelWriter(strDir+setNo+"//"+strDates[i]+".xlsx", engine='xlsxwriter')
+    #         write = dayProduction2Excel(jbData,setNo,write,sTime,eTime)
+    #         print('     Complete : '+str(datetime.datetime.now()))
+    #     # write1 = dayProduction2Excel(jbData, '2#', write1, sTime, eTime)
+    #         write.save()
+    #         write.close()
+
+
+    a = SimpleProductionalAlgorithm('XJYC.U_Packer_1500001070.DC_TYSSCL','2019-8-8 02:00:00','2019-8-9 2:35:00',50)
+
 
     print('')
