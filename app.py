@@ -3,6 +3,7 @@ from flask import request
 import json
 import JC.jc_predict as jc_pre
 import gb.interface as gb_ine
+import pandas as pd
 app = Flask(__name__)
 
 
@@ -65,26 +66,42 @@ def jcCon():
 @app.route('/gb')
 def GetUnitDayProduction():
     try:
-        _type = request.args.get('_type')
-        _startTime = request.args.get('type')
-        _endTime = request.args.get('_type')
-        _tags = request.args.get('type')
-        resultData = gb_ine.GetUnitDayProduction(_type , _startTime , _endTime , _tags)
+        _type = request.args.get('type')
+        _startTime = request.args.get('startTime')
+        _endTime = request.args.get('endTime')
+        _tags = request.args.get('tags')
+
+        if((_type==None)|(_startTime==None)|(_endTime==None)|(_tags==None)):
+            msg = '{"code":2,"msg":"参数不完整!",address:"app",errCode:"-79"}'
+            result = json.dumps(msg,ensure_ascii=False)
+            return result
+        tagsList = _tags.split(',')
+        resultData = gb_ine.GetUnitDayProduction(_type, _startTime, _endTime, tagsList)
         #True, ['-101', 'GetUnitDayProduction', '参数_type没有传入已知的类型！']
     except Exception:
         msg = '{"code":2,"msg":"操作异常!",address:"app",errCode:"-79"}'
-        result = json.dumps(msg)
+        result = json.dumps(msg,ensure_ascii=False)
         return result
     else:
         if (resultData[0] == True):
-            msg = '{"code":2,"msg":"' + (resultData[1])[2] + '",address:"' + (resultData[1])[1] + '",errCode:"' + \
-                  (resultData[1])[0] + '"}'
-            result = json.dumps(msg)
-            return result
+            #True, ['0', 'GetUnitDayProduction', '本日未开机！']
+            if((resultData[1])[0]=='0'):
+                msg = '{"code":1,"msg":"本日未开机!"}'
+                result = json.dumps(msg, ensure_ascii=False)
+                return result
+            else:
+                msg = '{"code":2,"msg":"' + (resultData[1])[2] + '",address:"' + (resultData[1])[1] + '",errCode:"' + \
+                      (resultData[1])[0] + '"}'
+                result = json.dumps(msg,ensure_ascii=False)
+                return result
         else:
-            msg = '{"code":2,"msg":"' + (resultData[1])[2] + '",address:"' + (resultData[1])[1] + '",errCode:"' + \
-                  (resultData[1])[0] + '"}'
-            result = json.dumps(msg)
+            df = resultData[1]
+            df['StartTimeStr'] = df['StartTime'].apply(lambda x:'NaT' if pd.isnull(x) else x.strftime("%Y-%m-%d %H:%M:%S"))
+            df['EndTimeStr'] = df['EndTime'].apply(lambda x: 'NaT' if pd.isnull(x) else x.strftime("%Y-%m-%d %H:%M:%S"))
+            daf = df.to_json(orient = 'records', force_ascii = False)
+            msg = '{"code":1,"msg":"'+daf+'"}'
+            result = json.dumps(msg,ensure_ascii=False)
             return result
+
 if __name__ == '__main__':
-    app.run()
+    app.run(host='0.0.0.0', port=5000)
