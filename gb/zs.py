@@ -2,8 +2,9 @@ import gb.preProcess as pre
 import gb.baseAlgorithm as baseAL
 import pandas as pd
 import numpy as np
-import os
 import datetime
+import bll.batch_process as batchProcess
+
 
 ###获取制丝批次期间段
 def zs_pcSecByPCH(_tags,_freq,_beginTime,_endTime):
@@ -26,8 +27,9 @@ def zs_pcSecByPCH(_tags,_freq,_beginTime,_endTime):
     pchDF = pd.DataFrame(pch)
     pchDF.rename(columns={0: 'PCH', 1: 'StartIndex', 2: 'EndIndex', 3: 'Count', 4: 'StartTime', 5: 'EndTime'},
                  inplace=True)
-    pchDF[['StartTime', 'EndTime']] = pchDF[['StartTime', 'EndTime']].apply(pd.to_datetime)
-    pchDF['Interval'] = pchDF.apply(lambda x: (x['EndTime'] - x['StartTime']).total_seconds() / 60, axis=1)
+    pchDF[['sTime','eTime']] =  pchDF[['StartTime', 'EndTime']].apply(pd.to_datetime)
+    # pchDF[['StartTime', 'EndTime']] = pchDF[['StartTime', 'EndTime']].apply(pd.to_datetime)
+    pchDF['Interval'] = pchDF.apply(lambda x: (x['eTime'] - x['sTime']).total_seconds() / 60, axis=1)
     pchDF = pchDF[['PCH', 'StartIndex', 'EndIndex', 'Count', 'StartTime', 'EndTime', 'Interval']]
     pchDF.sort_values(by=['StartIndex'], axis=0, ascending=True, inplace=True)
     # append ph bc
@@ -65,24 +67,62 @@ def zs_pcSecByPCH(_tags,_freq,_beginTime,_endTime):
     return pchDF
 
 
-def zs_pcSecByPCH(_tag,_freq,_pcSec,_delay):
+def zs_pcSecByLL(_tag,_freq,_pcSec,_delay):
+    import matplotlib.pyplot as pyplot
 
+    sec1 = _pcSec
+    sec1['Status'] = '0'
+    sec1['BatchStart'] = '1900-01-01 00:00:00.000'
+    sec1['BatchEnd'] = '1900-01-01 00:00:00.000'
     for i in range(0,_pcSec.shape[0],1):
-        sTime = _pcSec.iloc[i,'StartTime']
-        eTime = _pcSec.iloc[i, 'StartTime']
-        hisData = pre.loadHisDataByCyclic(_tag, _freq, sTime, eTime, _type='Value')
+        sTime = str(_pcSec['StartTime'].values[i])
+        eTime = str(_pcSec['EndTime'].values[i])
+        sTime = str(datetime.datetime.strptime(sTime,'%Y-%m-%d %H:%M:%S.%f')-datetime.timedelta(seconds=_delay))
+        eTime = str(datetime.datetime.strptime(eTime,'%Y-%m-%d %H:%M:%S.%f')+datetime.timedelta(seconds=_delay))
+        hisData = pre.loadHisDataByCyclic([_tag], '6000', sTime, eTime, _type='Value')
+        vector = hisData.values[:, 1].astype(np.float)
+        data1 = vector[:int(len(vector) / 2)]
+        data2 = vector[len(data1):]
+        #
+        # pyplot.plot(range(0, len(vector), 1), vector, 'r-')
+        # pyplot.show()
+        #
+        #通过标偏来判断是否有波形
+        std = np.std(vector)
+        if std <800 :  #以1000为临界值
+            sec1['Status'].values[i] = '1'
+        else:
+            if np.std(data1) < 800 or np.std(data2) < 800 :
+                sec1['Status'].values[i] = '2'
+        if sec1['Status'].values[i] != '0' :
+            continue
+        df = pd.DataFrame(vector)
+        batchPoint = batchProcess.check_batch_point(df)
+        sIndex = int(batchPoint[0][0])
+        eIndex = int(batchPoint[0][1])
+        if sIndex >= 20 :
+            sIndex = sIndex -20
+        if len(vector) - eIndex >= 20 :
+            eIndex = eIndex  + 20
+        sec1['BatchStart'].values[i] = str(hisData.values[sIndex, 0])
+        sec1['BatchEnd'].values[i] = str(hisData.values[eIndex, 0])
 
-
+    sec1[['sTime', 'eTime']] = sec1[['BatchStart', 'BatchEnd']].apply(pd.to_datetime)
+    # pchDF[['StartTime', 'EndTime']] = pchDF[['StartTime', 'EndTime']].apply(pd.to_datetime)
+    sec1['Interval1'] = sec1.apply(lambda x: (x['eTime'] - x['sTime']).total_seconds() / 60, axis=1)
+    return sec1
 
 if __name__ == "__main__":
-    tags = ['XJYC.U_BladeFeedingA.GBH',	'XJYC.U_BladeFeedingA.PCH', 'XJYC.U_BladeFeedingA.PH']
-    # tags = ['MES2RTDATA.U_BAL_11010150001.DC_TeamCode',	'MES2RTDATA.U_BAL_11010150001.DC_OrderNo',\
-    #         'MES2RTDATA.U_Cutting_11010110002.DC_PCH',	'MES2RTDATA.U_Cutting_11010110002.DC_PH',	'MES2RTDATA.U_DRY_11010150002.IT_SBZT']
-
-    llTag =
+    tags = ['XJYC.U_BladeFeedingA.GBH','XJYC.U_BladeFeedingA.PCH', 'XJYC.U_BladeFeedingA.PH']
+    llTag = 'XJYC.U_BladeFeedingB.GYLL'
+    # tags = ['MES2RTDATA.U_BAL_11010150001.DC_TeamCode',	 'MES2RTDATA.U_Cutting_11010110002.DC_PCH',	'MES2RTDATA.U_Cutting_11010110002.DC_PH']
+    # llTag = 'MES2RTDATA.U_BAL_11010150001.DC_LL'
+    # tags = ['MES2RTDATA.U_BAL_11010140001.DC_TeamCode',	 'MES2RTDATA.U_DRY_11010140003.DC_PCH',	'MES2RTDATA.U_DRY_11010140003.DC_PH']
+    # llTag = 'MES2RTDATA.U_BAL_11010220001.DC_LL'
     freq = '60000'
-    beginTime = '2019-8-8 02:00:00'
-    endTime = '2019-8-9 02:00:00'
+    beginTime = '2019-8-8 06:00:00'
+    endTime = '2019-8-9 06:00:00'
     a = zs_pcSecByPCH(tags,freq,beginTime,endTime)
+    b = zs_pcSecByLL(llTag,freq,a,1800)
 
     print('1')

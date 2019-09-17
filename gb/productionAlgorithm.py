@@ -77,7 +77,7 @@ def GeneralProductionalAlgorithm(_shiftTag,_phTag,_yieldsTag,_speedTag,_beginTim
     nullCount = hisData1[hisData1.values[:,1] == 'NULL'].shape[0]
     if nullCount / hisData1.shape[0] > 0.1 :
         noProduct[0] = 1  # Null值过多
-        noProductCount = noProductCount + 1
+        #noProductCount = noProductCount + 1
     else:
         hisData1.replace('NULL','0',inplace=True)
         runSec = baseAlg.runHaltIntervalBySpeed(hisData1, _type='run')
@@ -104,7 +104,7 @@ def GeneralProductionalAlgorithm(_shiftTag,_phTag,_yieldsTag,_speedTag,_beginTim
     naCount = hisData2[hisData2.values[:, [1, 2]] == ''].shape[0]
     if nullCount / hisData2.shape[0] > 0.1 or naCount / hisData2.shape[0]:
         noProduct[0] = 1  # Null值过多
-        noProductCount = noProductCount + 1
+        # noProductCount = noProductCount + 1
     else:
         hisData2.replace('NULL', '0', inplace=True)
         shiftPhSec1 = baseAlg.shiftPhSec(hisData2,tags2)

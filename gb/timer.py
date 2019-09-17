@@ -34,5 +34,5 @@ def everyDayJob(_h=0, _m=0,_factoryInfo=None,_startTime='05:00:00',_endTime='05:
 if __name__ == "__main__":
     # deltailInfo = [[ "d://jb//ky//",'ky.xlsx','ky'],["d://jb//hy//",'hy.xlsx','Sheet1'],[ "d://jb//qy//",'qy.xlsx','Sheet1'], \
     #     ["d://jb//hz//", 'hz.xlsx', 'hz'], ["d://jb//xj//", 'xj.xlsx', 'xj'], ["d://jb//wl//", 'wl.xlsx', 'wl']]
-    deltailInfo =[["d://jb//xj//", 'xj.xlsx', 'xj']]
-    everyDayJob(_factoryInfo=deltailInfo,_productDate='2019-8-7',_startTime='10:00:00',_endTime='10:00:00')
+    deltailInfo =[["d://jb//wl//", 'wl.xlsx', 'wl']]
+    everyDayJob(_factoryInfo=deltailInfo,_productDate='2019-9-5',_startTime='5:00:00',_endTime='8:00:00')
