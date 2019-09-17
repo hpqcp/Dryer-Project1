@@ -77,6 +77,8 @@ def getDifferenceList_Top(_df, _stdGPro, _stdTop, _mode="up", _isPlot=False):
         DifferenceList_x2 = x2_result[maxIndex]
         DifferenceSeries = pd.Series(DifferenceList_x2, index=DifferenceList_x1)
         _stdGCount = int(len(DifferenceSeries) * _stdGPro)
+        if(_stdGCount==0):
+            _stdGCount=2
         Difference_max = DifferenceSeries.rolling(_stdGCount).max()
         Difference_min = DifferenceSeries.rolling(_stdGCount).min()
         Difference_std = Difference_max.sub(Difference_min)
@@ -97,9 +99,9 @@ def getDifferenceList_Top(_df, _stdGPro, _stdTop, _mode="up", _isPlot=False):
 
         all_list = list(set(all_list))
         all_list.sort()
-
-        result_series = DifferenceSeries[(DifferenceSeries.index.values >= all_list[0]) & (
-                DifferenceSeries.index.values <= all_list[-1])]
+        indexlist=(DifferenceSeries.index.values >= all_list[0]) & (
+                DifferenceSeries.index.values <= all_list[-1])
+        result_series = DifferenceSeries[indexlist]
         if (_mode == "up"):
             iv = getHeadOrTail(result_series, "Last", _oriIndex=oriIndex)
             result_list.append(iv)

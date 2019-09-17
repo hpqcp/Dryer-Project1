@@ -46,9 +46,9 @@ def GetBatchInfoBySegment(_tags,_freq,_beginTime,_endTime,_delay):
     tags2 = _tags[3]   #GYLL
     pcInfo = zs.zs_pcSecByPCH(tags1,_freq,_beginTime,_endTime)
     if (pcInfo.empty):
-        return True,['0','GetBatchInfoBySegment','批次数据为空！']
+        return [True,['0','GetBatchInfoBySegment','批次数据为空！']]
     b = zs.zs_pcSecByLL(tags2, _freq, pcInfo, _delay)
-    return b
+    return [False,b]
 
 if __name__ == "__main__":
     # import datetime
@@ -72,12 +72,13 @@ if __name__ == "__main__":
     # print('a')
 
     #制丝
-    tags = ['XJYC.U_BladeFeedingA.GBH', 'XJYC.U_BladeFeedingA.PCH', 'XJYC.U_BladeFeedingA.PH','XJYC.U_BladeFeedingB.GYLL']
+    #tags = ['XJYC.U_BladeFeedingA.GBH', 'XJYC.U_BladeFeedingA.PCH', 'XJYC.U_BladeFeedingA.PH','XJYC.U_BladeFeedingB.GYLL']
     # tags = ['MES2RTDATA.U_BAL_11010150001.DC_TeamCode',	 'MES2RTDATA.U_Cutting_11010110002.DC_PCH',	'MES2RTDATA.U_Cutting_11010110002.DC_PH','MES2RTDATA.U_BAL_11010150001.DC_LL']
-
+    #昆烟A线回潮一加段
+    tags = ['MES2RTDATA.U_BAL_11010010002.DC_TeamCode','MES2RTDATA.U_CON_11010010003.DC_PCH','MES2RTDATA.U_CON_11010010003.DC_PH','MES2RTDATA.U_BAL_11010010002.DC_LL']
     # tags = ['MES2RTDATA.U_BAL_11010140001.DC_TeamCode',	 'MES2RTDATA.U_DRY_11010140003.DC_PCH',	'MES2RTDATA.U_DRY_11010140003.DC_PH','MES2RTDATA.U_BAL_11010220001.DC_LL']
     freq = '60000'
-    beginTime = '2019-8-8 06:00:00'
-    endTime = '2019-8-9 06:00:00'
+    beginTime = '2019-8-9 06:00:00'
+    endTime = '2019-8-10 06:00:00'
     b = GetBatchInfoBySegment(tags,freq,beginTime,endTime,1800)
     print(b)
