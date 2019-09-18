@@ -124,7 +124,7 @@ def GetBatchInfoBySegment():
         _delay = request.args.get('delay')
         tagsList = _tags.split(',')
 
-        resultData = gb_ine.GetBatchInfoBySegment(tagsList,_freq,_startTime,_endTime,_delay) #调用interFace接口
+        resultData = gb_ine.GetBatchInfoBySegment(tagsList,_freq,_startTime,_endTime,int(_delay)) #调用interFace接口
         rend = dat.datetime.now()
         print("***************startTime:" + str(rsatrt) + "   endTime:" + str(rend) + "******************")
     except Exception as e:
