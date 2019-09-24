@@ -14,8 +14,10 @@ def zs_pcSecByPCH(_tags,_freq,_beginTime,_endTime):
     hisData = pre.loadHisDataByCyclic(_tags, freq, beginTime, endTime, _type='vValue')
     if hisData.empty:
         return None
+    
     _tags.insert(0,'DateTime')
     hisData = hisData[_tags]
+
     hisData.columns = ['DateTime', 'Shift', 'PCH', 'PH']
     pch = list()
     for i in hisData.groupby('PCH'):
