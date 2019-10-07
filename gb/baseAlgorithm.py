@@ -259,6 +259,31 @@ def appenTotalRow(_df):
     df1 = df1.append(newRow,ignore_index=True)
     return df1
 
+#
+#_tags : _jtNoTag=None,_rejectTag=None,_speedTag=None,_trademarkConsum=None,_underweightTag=None,_overweightTag=None
+def allTagsRadio(_productionSec,_tags):
+    
+    productionSec1 = _productionSec
+    # 列重命名
+    hisData1.rename(columns={hisData1.columns[1]: 'Shift', hisData1.columns[2]: 'PH'}, inplace=True)
+    order = ['DateTime', "Shift", "PH"]
+    hisData2 = hisData1[order]  # 调整顺序
+    nPH = list()
+    nPHPer = list()
+    nShift = list()
+    nShiftPer = list()
+
+
+    valueList = list()
+    radioList = list()
+    for i in range(0,_tags.length,1):
+        if _tags[i] == None :
+            valueList[i] = np.nan
+            radioList[i] = np.nan
+        count = 0
+
+
+
 
 
 if __name__ == "__main__":

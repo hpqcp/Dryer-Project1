@@ -213,12 +213,12 @@ def dayProduction2Excel(_excelData,_strSet,_excelWriter,_startTime,_endTime,_pat
 
 
 if __name__ == "__main__":
-    # str1 ="MES2RTDATA.U_Maker_11020030009.DC_BC"
-    # str3 ="MES2RTDATA.U_Maker_11020030009.DC_SJCL"
-    # str4 ="MES2RTDATA.U_Maker_11020030009.DC_YXSD"
-    # str2 ="MES2RTDATA.U_Maker_11020030009.DC_PH"
-    # a = GeneralProductionalAlgorithm(str1,str2,str3,str4,"2019-07-01 06:00:00","2019-07-02 06:00:00",5000)
-    # print(a)
+    str1 ="MES2RTDATA.U_Maker_11020030001.DC_BC"
+    str3 ="MES2RTDATA.U_Maker_11020030001.DC_SJCL"
+    str4 ="MES2RTDATA.U_Maker_11020030001.DC_YXSD"
+    str2 ="MES2RTDATA.U_Maker_11020030001.DC_PH"
+    a = GeneralProductionalAlgorithm(str1,str2,str3,str4,"2019-07-01 06:00:00","2019-07-02 06:00:00",5000)
+    print(a)
 
     # jbData = pd.read_excel("d://jb//jb.xlsx",sheet_name='ky',header=0)
     # # setData = jbData.iloc[jbData['set'].values == '1#',:]
@@ -287,7 +287,7 @@ if __name__ == "__main__":
     #         write.close()
 
 
-    a = SimpleProductionalAlgorithm('XJYC.U_Packer_1500001070.DC_TYSSCL','2019-8-8 02:00:00','2019-8-9 2:35:00',50)
+    # a = SimpleProductionalAlgorithm('XJYC.U_Packer_1500001070.DC_TYSSCL','2019-8-8 02:00:00','2019-8-9 2:35:00',50)
 
 
     print('')
