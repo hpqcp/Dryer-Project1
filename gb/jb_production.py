@@ -1,6 +1,50 @@
+import gb.baseAlgorithm as baseAlg
+import gb.preProcess as pre
+import pandas as pd
+import numpy as np
+
 #计算卷包机
 #_threshold:临界值
+# _jtNoTag 机台号 ；_shiftTag 班次号 ；_phTag 牌号 ；_yieldsTag 产量
+# _rejectTag 剔除量 ；_speedTag 速度 ； _underweightTag 过轻剔除 ；overweightTag 过重剔除
 def GeneralProductionalAlgorithm(_shiftTag,_phTag,_yieldsTag,_speedTag,_beginTime,_endTime,_threshold):
+    ##3.获取产量数据
+    tags3 = [_yieldsTag]
+    freq = "6000"  # 6s
+    hisData3 = pre.loadHisDataByCyclic(tags3, freq, _beginTime, _endTime, _type='Value')
+    if (hisData3.empty):
+        return True, ["-301", "GeneralProductionalAlgorithm", "数据为空！"]
+    ######曲烟数据存在NULL值，且为字符型，在此判断NULL比率，超过10%，则不进行后续计算     2019-7-26
+    nullCount = hisData3[hisData3.values[:, 1] == 'NULL'].shape[0]
+    if (nullCount / hisData3.shape[0] > 0.1):
+        return True, ["-302", "GeneralProductionalAlgorithm", "NULL值过多！ NULL比率：" + str(nullCount / hisData3.shape[0])]
+    hisData3.replace('NULL', '0', inplace=True)  # 用 0 填充NULL
+    ###############################
+    hisData3 = baseAlg.wavePorcess_fillBreakPoint(hisData3, _threshold / 4)
+    peeks = baseAlg.findPeaksBySci(hisData3)
+    if peeks.size <= 0:
+        noProduct[2] = 1  # 未找到拐点， 可能全天未开机
+        noProductCount = noProductCount + 1
+    if peeks.size < 1:
+        return False, None
+    # 4 .判断是否大于临界值的个数,如果小于1000，则认为未开机
+    lessThresholdCount = hisData3[hisData3['Product'].values.astype(np.float) >= _threshold]
+    if lessThresholdCount.empty | lessThresholdCount.shape[0] < 1000:
+        return False, None
+    # 4.2个以上判断条件都为可能未开机，则表示当天未开机
+    if noProductCount >= 2:
+        return False, None
+
+    # 5.
+    pSec1 = baseAlg.wavePorcess_productionSection(hisData3, _threshold)
+    pCompute1 = baseAlg.wavePorcess_productionCompute(pSec1)
+    if pCompute1 is None:
+        return False, None
+    productionTable = baseAlg.wavePorcess_shiftPH(hisData2, pCompute1)
+    productionTable1 = baseAlg.appenTotalRow(productionTable)
+    return False, productionTable1
+
+
     #预定义变量
     noProduct = [0,0,0]   #是否全天未生产判断list,1未生产，0已生产；[0]通过制度排班进行判断；[1]通过运行速度判断
     noProductCount = 0
