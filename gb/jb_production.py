@@ -48,7 +48,7 @@ if __name__ == "__main__":
     str3 = "MES2RTDATA.U_Maker_11020030001.DC_SJCL"
     str4 = "MES2RTDATA.U_Maker_11020030001.DC_YXSD"
     str2 = "MES2RTDATA.U_Maker_11020030001.DC_PH"
-    a = GeneralProductionalAlgorithm(str1, str2, str3, str4, "2019-10-01 06:00:00", "2019-10-02 06:00:00", 5000)
+    a = GeneralProductionalAlgorithm(str1, str2, str3, str4, "2019-7-01 06:00:00", "2019-7-02 06:00:00", 5000)
     print(a)
 
     # #预定义变量

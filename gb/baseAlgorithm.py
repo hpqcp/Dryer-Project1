@@ -262,7 +262,7 @@ def appenTotalRow(_df):
 #
 #_tags : _jtNoTag=None,_rejectTag=None,_speedTag=None,_trademarkConsum=None,_underweightTag=None,_overweightTag=None
 def allTagsRadio(_productionSec,_tags):
-    
+
     productionSec1 = _productionSec
     # 列重命名
     hisData1.rename(columns={hisData1.columns[1]: 'Shift', hisData1.columns[2]: 'PH'}, inplace=True)

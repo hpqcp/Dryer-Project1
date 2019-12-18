@@ -5,25 +5,57 @@ import datetime
 
 
 
-# pool = redis.ConnectionPool(host='127.0.0.1')
-# r = redis.Redis(connection_pool=pool)
-#
-# path = "d://C线10批数据（20190315）.xlsx"
-# group = "t"  # t test data
-# factoryID="1" # 1Ky 2 hy 3qy
-# deptID = "z" # z zs j jb c cx
-# lineID = "c" # line C
-# batch = "0001"
-# #secID = 3 # 3 yslq 4 hs 5 yslq
-# for i in range(0,10,1):
-#     df = bsPre.readExcel(path, i)
-#     # print(df.values[0,:])
-#     for j in range(0,df.shape[0],1):
-#         data = df.values[j,[0,1,3,5,7,9,11,13,15,17]].tolist()
-#         key = group+factoryID+deptID+lineID+"000"+str(i)+data[0]
-#         r.rpush(key,data[0],data[1],data[2],data[3],data[4],data[5],data[6],data[7],data[8],data[9])
-# exit()
 
+
+def csv2Redis(_host,_db,_gourp,_path,_sheet,_keyCol,_valueCols):
+    pool = redis.ConnectionPool(host=_host, decode_responses=True, db=_db)
+    r = redis.Redis(connection_pool=pool, decode_responses=True, db=_db)
+    path = _path
+    group = _gourp
+    df = bsPre.readExcel(path, _sheet)
+    cmdStr = "r.rpush(key"
+    for i in range(0, len(_valueCols), 1):
+        cmdStr = cmdStr + ",str(data[j][" + str(_valueCols[i]) + "])"
+    cmdStr = cmdStr + ")"
+    pipe = r.pipeline(transaction=True)
+    data = df.values.tolist()
+    lens = df.shape[0]
+    for j in range(0,lens, 1):
+        key = group + str(data[j][_keyCol])
+        eval(cmdStr)
+    pipe.execute()
+
+def getBatchData(_patten, _db):
+    pool = redis.ConnectionPool(host='127.0.0.1', decode_responses=True, db=_db)
+    r = redis.Redis(connection_pool=pool, decode_responses=True, db=_db)
+    key1 = r.keys(pattern=_patten)  # "t1zc0000*")
+    dt = DataFrame([r.lrange(key1[i], 0, -1) for i in range(1, len(key1), 1)][:])
+    dt1 = dt.sort_values(0)
+    dt2 = dt1.reset_index(drop=True)
+    for i in range(1, dt2.shape[1], 1):
+        dt2[[i]] = dt2[[i]].astype('float')
+    # print(dt.dtypes)
+    r.connection_pool.disconnect()
+    return dt2
+
+if __name__ == "__main__":
+    # host = '127.0.0.1'
+    # db = 1
+    # group = '4000-'
+    # path = 'E://工作文档//FangCloudV2//个人文件//2019年10月4000线回潮段数据.xlsx'
+    # sheet = 0
+    # keyCol = 0
+    # valueCols = [1,3,5,7,9,11,13,15,17,19,21,23,25,27,29,31,33,35]
+    # for i in range(0,18,1):
+    #     csv2Redis(host,db,group,path,i,keyCol,valueCols)
+
+
+    df = getBatchData('4000-2019-10-09*', 1)
+    df1 = DataFrame(df.values[:,0])
+    df1[0]=df1[0].astype('float64')
+    import chart.plot as pl
+    pl.singlePlot(df1)
+    print('1')
 
 def fromCsv():
     pool = redis.ConnectionPool(host='127.0.0.1', decode_responses=True, db=1)
@@ -46,18 +78,7 @@ def fromCsv():
                 data[12], data[13], data[14])
 
 
-def getBatchData(_patten, _db):
-    pool = redis.ConnectionPool(host='127.0.0.1', decode_responses=True, db=_db)
-    r = redis.Redis(connection_pool=pool, decode_responses=True, db=_db)
-    key1 = r.keys(pattern=_patten)  # "t1zc0000*")
-    dt = DataFrame([r.lrange(key1[i], 0, -1) for i in range(1, len(key1), 1)][:])
-    dt1 = dt.sort_values(0)
-    dt2 = dt1.reset_index(drop=True)
-    for i in range(1, dt2.shape[1], 1):
-        dt2[[i]] = dt2[[i]].astype('float')
-    # print(dt.dtypes)
-    r.connection_pool.disconnect()
-    return dt2
+
 
 
 def getBatchDataDelay(_patten, startDelay, endDelay, _db):
