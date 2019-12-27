@@ -1,5 +1,6 @@
 import redis as redis
 from pandas import DataFrame
+import pandas as pd
 import base.data_preProcess as bsPre
 import datetime
 
@@ -42,19 +43,32 @@ if __name__ == "__main__":
     # host = '127.0.0.1'
     # db = 1
     # group = '4000-'
-    # path = 'E://工作文档//FangCloudV2//个人文件//2019年10月4000线回潮段数据.xlsx'
+    # path = 'E://工作文档//FangCloudV2//个人文件//9000其他//松散回潮项目//试验数据//2019年10月4000线回潮段数据.xlsx'
     # sheet = 0
     # keyCol = 0
-    # valueCols = [1,3,5,7,9,11,13,15,17,19,21,23,25,27,29,31,33,35]
+    # valueCols = [0,1,3,5,7,9,11,13,15,17,19,21,23,25,27,29,31,33,35]
     # for i in range(0,18,1):
     #     csv2Redis(host,db,group,path,i,keyCol,valueCols)
 
 
-    df = getBatchData('4000-2019-10-09*', 1)
-    df1 = DataFrame(df.values[:,0])
-    df1[0]=df1[0].astype('float64')
-    import chart.plot as pl
-    pl.singlePlot(df1)
+    # df = getBatchData('4000-2019-10-07*', 1)
+    # df1 = DataFrame(df.values[:,[0,1,2,3]])
+    # df1[0]=pd.to_datetime(df1[0])
+    # df1[1]=df1[1].astype('float64')
+    # df1[2] = df1[2].astype('float64')
+    # df1[3] = df1[3].astype('float64')
+    # import chart.plot as pl
+    # # pl.singlePlot(df1)
+    # import matplotlib.pyplot as pyplot
+    # fig, ax1 = pyplot.subplots()
+    # pyplot.ylim(0, 4200)
+    # ax2 = ax1.twinx()  # 做镜像处理
+    # pyplot.ylim(0, 4200)
+    # ax3 = ax1.twinx()
+    # ax1.plot(df1[0],df1[1], 'g-')
+    # ax2.plot(df1[0],df1[2], 'b--')
+    # ax3.plot(df1[0],df1[3], 'r--')
+    # pyplot.show()
     print('1')
 
 def fromCsv():
