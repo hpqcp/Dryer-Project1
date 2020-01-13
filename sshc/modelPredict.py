@@ -82,16 +82,7 @@ def cross_score(_x,_y,_n):
     return score_ndarray,score_ndarray.mean()
 
 
-#
-#_df,_xLoc,_yLoc,_pointNum
-#
-def rf_model_1(_parmList):
-    import sshc.modelPredict as modelPredict
-    shiftList = _parmList[0]
-    df = _parmList[1]
-    df_a = time_align_transform(df,shiftList)
-    _, scores = modelPredict.cross_score(df_a.values[:,0], df_a.values[:,1], 5)
-    return [_xLoc,_pointNum,scores]
+
 
 
 #
@@ -109,9 +100,8 @@ def feature_selection_sshc(_x,_y):
     y1 = ss_y.fit_transform(_y.reshape(-1, 1))
     clf = RandomForestRegressor()
     clf = clf.fit(x1, y1)
-    a = clf.feature_importances_  # 显示每一个特征的重要性指标，越大说明越重要，可以看出，第三第四两个特征比较重要
-    model = SelectFromModel(clf, prefit=True)
-    X_new = model.transform(x1)
+    return clf.feature_importances_  # 显示每一个特征的重要性指标，越大说明越重要，可以看出，第三第四两个特征比较重要
+
 
 #
 

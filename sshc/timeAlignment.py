@@ -38,6 +38,7 @@ def pre_align_train(_df,_pointList,_topNum=3):
     #
     pool = Pool(cores-1)
     res = pool.map(rf_model,cList)
+    pool.close()
     endtime = datetime.datetime.now()
     df_res = DataFrame(res)
     print ((endtime - starttime).seconds)
@@ -104,7 +105,16 @@ def time_align_fit(_df,_pointList):
     return
 
 
-
+#
+#_df,_xLoc,_yLoc,_pointNum
+#
+def rf_model_1(_parmList):
+    import sshc.modelPredict as modelPredict
+    shiftList = _parmList[0]
+    df = _parmList[1]
+    df_a = time_align_transform(df,shiftList)
+    _, scores = modelPredict.cross_score(df_a.values[:,0], df_a.values[:,1], 5)
+    return [_xLoc,_pointNum,scores]
 #
 #
 #

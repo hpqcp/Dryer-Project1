@@ -40,15 +40,15 @@ def getBatchData(_patten, _db):
     return dt2
 
 if __name__ == "__main__":
-    # host = '127.0.0.1'
-    # db = 1
-    # group = '4000-'
-    # path = 'E://工作文档//FangCloudV2//个人文件//9000其他//松散回潮项目//试验数据//2019年10月4000线回潮段数据.xlsx'
-    # sheet = 0
-    # keyCol = 0
-    # valueCols = [0,1,3,5,7,9,11,13,15,17,19,21,23,25,27,29,31,33,35]
-    # for i in range(0,18,1):
-    #     csv2Redis(host,db,group,path,i,keyCol,valueCols)
+    host = '127.0.0.1'
+    db = 2
+    group = '2400-'
+    path = 'E://工作文档//FangCloudV2//个人文件//9000其他//松散回潮项目//试验数据//2019年11月2400线回潮段数据.xlsx'
+    sheet = 0
+    keyCol = 0
+    valueCols = [0,1,3,5,7,9,11,13,15,17,19,21,23,25,27,29,31]
+    for i in range(0,37,1):
+        csv2Redis(host,db,group,path,i,keyCol,valueCols)
 
 
     # df = getBatchData('4000-2019-10-07*', 1)
