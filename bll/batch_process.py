@@ -37,8 +37,8 @@ def check_batch_point(_df, _groupRatio=0.1, _GroupTop=5):
     firstDf = _df[:int(_df.shape[0] / 2)]
     lastDf = _df[firstDf.shape[0]:]
     # 处理前半部分数据
-    lsFirst = getDifferenceList_Top(firstDf, _stdGPro=_groupRatio, _stdTop=_GroupTop, _mode="up", _isPlot=False)
-    lsLast = getDifferenceList_Top(lastDf, _stdGPro=_groupRatio, _stdTop=_GroupTop, _mode="down", _isPlot=False)
+    lsFirst = getDifferenceList_Top(firstDf, _stdGPro=_groupRatio, _stdTop=_GroupTop, _mode="up", _isPlot=True)
+    lsLast = getDifferenceList_Top(lastDf, _stdGPro=_groupRatio, _stdTop=_GroupTop, _mode="down", _isPlot=True)
     # print(lsFirst)
     # print(lsLast)
     locFirst = [lsFirst[i][0] for i in range(0,len(lsFirst),1)]
