@@ -9,12 +9,70 @@ import pandas as pd
 
 #
 #
-#
-def multi_pre_align_train(_dfList=[],_pointList=[],_topNum=3):
+def multi_align_train(_dfList=[],_pointList=[],_topNum=20):
 
     dfAll = DataFrame()
     for i in range(0,len(_dfList),1):
-        retDF = pre_align_train(_dfList[i],_pointList,_topNum)
+        retDF = pre_align_train(_dfList[i],_pointList[i],_topNum)
+        retDF['round'] = i
+        dfAll=pd.concat([dfAll,retDF],axis=0)
+    return dfAll
+
+
+
+#
+#
+#对时间对齐进行预训练
+##思路是x1,x2,x3.....分别与y进行一对一进行交叉验证，找到每一组得分最高TOPn点
+# _rollType,数据移动类型，空为不移动;_rollNum,移动分组，几个为一组
+def align_train(_df,_pointList,_topNum=3):
+    from multiprocessing import Pool
+    import multiprocessing as mp
+    import datetime
+    import base.data_transform as dt
+
+    starttime = datetime.datetime.now()
+    cores = mp.cpu_count()
+    cList = list()
+    for i in range(len(_pointList)):
+        a= _pointList[i]
+        cList.append([0,i,_pointList[i], _df.values])
+    #
+    pool = Pool(cores-1)
+    res = pool.map(rf_fit,cList)
+    pool.close()
+    endtime = datetime.datetime.now()
+    df_res = DataFrame(res)
+    print ((endtime - starttime).seconds)
+    df_res.columns = ['x','shifts','score'] #x,偏移量，得分
+    df_res.sort_values(['score'],ascending=[0],inplace=True)
+    # grouped = df_res.groupby(['x']).head(_topNum)
+    return df_res
+
+#
+#_df,_xLoc,_yLoc,_pointNum
+#
+def rf_fit(_parmList):
+    import sshc.modelPredict as modelPredict
+    _yLoc = _parmList[0]
+    _xLoc = _parmList[1]
+    _pointNum = _parmList[2]
+    df_target =  DataFrame(_parmList[3])
+    df_target = DataFrame(df_target.values)
+    df_a = time_align_transform(df_target,_pointNum)
+    dfx = df_a.values[:,1]
+    _, scores = modelPredict.cross_score(dfx, df_a.values[:,0], 5)
+    print("Finish fit : "+str(_xLoc))
+    return [_xLoc,_pointNum,scores]
+
+#
+#
+#
+def multi_pre_align_train(_dfList=[],_pointList=[],_topNum=3,_rollType='',_rollNum=0):
+
+    dfAll = DataFrame()
+    for i in range(0,len(_dfList),1):
+        retDF = pre_align_train(_dfList[i],_pointList,_topNum,_rollType,_rollNum)
         retDF['round'] = i
         dfAll=pd.concat([dfAll,retDF],axis=0)
     return dfAll
@@ -24,17 +82,23 @@ def multi_pre_align_train(_dfList=[],_pointList=[],_topNum=3):
 #
 #对时间对齐进行预训练
 ##思路是x1,x2,x3.....分别与y进行一对一进行交叉验证，找到每一组得分最高TOPn点
-#
-def pre_align_train(_df,_pointList,_topNum=3):
+# _rollType,数据移动类型，空为不移动;_rollNum,移动分组，几个为一组
+def pre_align_train(_df,_pointList,_topNum=3,_rollType='',_rollNum=0):
     from multiprocessing import Pool
     import multiprocessing as mp
     import datetime
+    import base.data_transform as dt
+
     starttime = datetime.datetime.now()
     cores = mp.cpu_count()
     cList = list()
     for j in range(1,_df.shape[1],1):
         for i in _pointList:
-            cList.append([0,j,i,_df.values[:,[0,j]]])
+            if _rollType=='' :
+                cList.append([0,j,i, _df.values[:,[0,j]]])
+            elif _rollType == 'mean' :
+                a = dt.dataFrameRoll(_df.iloc[:,[0,j]],_rollNum,[0,1])
+                cList.append([0, j, i, a.values[:, [0, 1]]])
     #
     pool = Pool(cores-1)
     res = pool.map(rf_model,cList)
@@ -129,28 +193,35 @@ def read_sshc_data(_keyStr):
 
 
 if __name__ == "__main__":
-    # __spec__ = None
-    # import utils.excel2redis as rds
-    #
-    # df = rds.getBatchData('4000-2019-10-07*', 1)
+    __spec__ = None
+    import utils.excel2redis as rds
+
+    df = rds.getBatchData('2400-2019-11-03*', 2)
     # df1 = DataFrame(df.values[:, [3, 1, 6, 10, 11, 12, 13, 14, 17]])
-    # df2 = DataFrame(df1, dtype=np.float)
+    df1 = DataFrame(df.values[:, [3, 10,11]])
+    df2 = DataFrame(df1, dtype=np.float)
     # pointDiffList = [0,80,34,17,52,14,3,21,52]
     # df3=time_align_transform(df2,pointDiffList)
     # df_y = df3.values[:,0]
     # df_x = df3.values[:,1:]
 
-    dateStr = ['07','08','09','10','11','12','13','14','15','16','17','18','19','20','21','22']
-    listDF = list()
-    for i in range(0,len(dateStr),1):
-        data = read_sshc_data('4000-2019-10-'+dateStr[i]+'*')
-        listDF.append(data)
+    # dateStr = ['07','08','09','10','11','12','13','14','15','16','17','18','19','20','21','22']
+    # listDF = list()
+    # for i in range(0,len(dateStr),1):
+    #     data = read_sshc_data('4000-2019-10-'+dateStr[i]+'*')
+    #     listDF.append(data)
 
     aList = list()
-    for i in range(0,101,10):
-        aList.append(i)
-    ret = multi_pre_align_train(listDF,aList)
-
+    # for i in range(0,101,10):
+    #     aList.append(i)
+    from itertools import product as product
+    c = [i for i in range(1)]
+    a = [i for i in range(101)]
+    b = [i for i in range(101)]
+    for item in product(c,a,b):
+        aList.append(list(item))
+    # ret = multi_pre_align_train(listDF,aList)
+    ret = align_train(df2,aList,_topNum=5)
 
     # feature_selection_sshc(df_x,df_y)
     # scores,mean_score = cross_score(df_x,df_y,10)
