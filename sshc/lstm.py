@@ -54,7 +54,6 @@ def build_model():
 
     model.add(Dense(units=1))
     model.add(Activation('linear'))
-
     model.compile(loss='mse', optimizer='rmsprop')
     return model
 

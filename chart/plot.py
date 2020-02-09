@@ -17,7 +17,7 @@ def pairPlot(_df,_ylim=[],_title=""):
     return 0
 
 #多subplot,每列数据一个subplot
-def singlePlot(_df,_name=[],_ylim=[],_title=""):
+def singlePlot(_df: object, _name: object = [], _ylim: object = [], _title: object = "") -> object:
     colNum = _df.shape[1]
     if colNum<1 :
         return -1

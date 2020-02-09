@@ -7,7 +7,7 @@ import pandas as pd
 #
 #
 #return: 训练后模型 ， 标准化对象X ， 标准化对象y
-def randomForest_model(_xTrain,_yTrain):
+def randomForest_model(_xTrain: object, _yTrain: object) -> object:
     from sklearn.preprocessing import StandardScaler
     from sklearn.ensemble import RandomForestRegressor
 
@@ -26,7 +26,7 @@ def randomForest_model(_xTrain,_yTrain):
 #
 #
 #
-def randomForest_predict_score(_model,_ssx,_ssy,_xTest,_yTest,_isPlot=False):
+def randomForest_predict_score(_model: object, _ssx: object, _ssy: object, _xTest: object, _yTest: object, _isPlot: object = False) -> object:
     from sklearn.model_selection import train_test_split
     from sklearn.preprocessing import StandardScaler
     from sklearn.ensemble import RandomForestRegressor
@@ -39,7 +39,7 @@ def randomForest_predict_score(_model,_ssx,_ssy,_xTest,_yTest,_isPlot=False):
     df_p = pd.DataFrame(_ssy.inverse_transform(y_predict))  # 将标准化后的数据转换为原始数据。
     # df_t = pd.DataFrame(_ssy.inverse_transform(_yTest))  # 将标准化后的数据转换为原始数据。
     df_t = pd.DataFrame(_yTest)
-    df = pd.concat([df_t, df_p], axis=1)
+    df = pd.concat([df_t, df_p], axis=1,ignore_index=True)
     if _isPlot:
         plt.pairPlot(df)
     r2 = r2_score(df.values[:, 0], df.values[:, 1])
@@ -48,6 +48,16 @@ def randomForest_predict_score(_model,_ssx,_ssy,_xTest,_yTest,_isPlot=False):
     return {'R2':r2,'MSE':mse,'MAE':mae},df
 
 #
+def model_load(_path=None):
+    from sklearn.externals import joblib
+    if  _path == None :
+        raise Exception('模型加载路径为空！')
+    try:
+        model = joblib.load(_path)
+    except:
+        raise Exception('模型加载错误！')
+    else:
+        return model
 #
 #
 def model_save(_model=None,_path=None):

@@ -15,14 +15,13 @@ from sklearn.preprocessing import MinMaxScaler
 import utils.excel2redis as rds
 from sklearn.metrics import r2_score, mean_squared_error, mean_absolute_error
 
-def create_dataset(dataset, look_back,predict_step=1):
+def create_dataset(dataset, look_back):
 #这里的look_back与timestep相同
     dataX, dataY = [], []
-    for i in range(len(dataset)-look_back-1-predict_step):
+    for i in range(len(dataset)-look_back-1):
         a = dataset[i:(i+look_back)]
         dataX.append(a)
-        b=dataset[(i + look_back):(i + look_back + predict_step)]
-        dataY.append(b)
+        dataY.append(dataset[i + look_back])
     return np.array(dataX),np.array(dataY)
 
 #逐点预测
@@ -51,14 +50,13 @@ if __name__ == '__main__':
     trainlist = dataset[:train_size]
     testlist = dataset[train_size:]
 
-    scaler = MinMaxScaler(feature_range=(0, 1))
-    dataset = scaler.fit_transform(dataset)
+
 
 
     #训练数据太少 look_back并不能过大
     look_back = 10
-    trainX,trainY  = create_dataset(trainlist,look_back,predict_step=10)
-    testX,testY = create_dataset(testlist,look_back,predict_step=10)
+    trainX,trainY  = create_dataset(trainlist,look_back)
+    testX,testY = create_dataset(testlist,look_back)
 
     trainX = np.reshape(trainX, (trainX.shape[0], trainX.shape[1], 1))
     testX = np.reshape(testX, (testX.shape[0], testX.shape[1] ,1 ))
@@ -67,10 +65,10 @@ if __name__ == '__main__':
 
     # create and fit the LSTM network
     model = Sequential()
-    model.add(LSTM(3, input_shape=(None,1),return_sequences=True))
+    model.add(LSTM(4, input_shape=(None,1),return_sequences=True))
     model.add(Dense(1))
     model.compile(loss='mean_squared_error', optimizer='adam',metrics=['mae', 'acc'])
-    model.fit(trainX, trainY, epochs=100, batch_size=1024, verbose=2)
+    model.fit(trainX, trainY, epochs=100, batch_size=512, verbose=2)
     # model.save('c://lstm1.m')
     # make predictions
 

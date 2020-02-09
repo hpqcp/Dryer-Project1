@@ -29,7 +29,6 @@ def align_train(_df,_pointList,_topNum=3):
     from multiprocessing import Pool
     import multiprocessing as mp
     import datetime
-    import base.data_transform as dt
 
     starttime = datetime.datetime.now()
     cores = mp.cpu_count()
@@ -60,7 +59,7 @@ def rf_fit(_parmList):
     df_target =  DataFrame(_parmList[3])
     df_target = DataFrame(df_target.values)
     df_a = time_align_transform(df_target,_pointNum)
-    dfx = df_a.values[:,1]
+    dfx = df_a.values[:,1:]
     _, scores = modelPredict.cross_score(dfx, df_a.values[:,0], 5)
     print("Finish fit : "+str(_xLoc))
     return [_xLoc,_pointNum,scores]
@@ -154,7 +153,6 @@ def time_align_fit(_df,_pointList):
     for item in  product(*allList):
         trainList.append([list(item),_df.values])
     dff = DataFrame(trainList)
-    from multiprocessing import Pool
     import multiprocessing as mp
     import datetime
     starttime = datetime.datetime.now()
@@ -194,12 +192,12 @@ def read_sshc_data(_keyStr):
 
 if __name__ == "__main__":
     __spec__ = None
-    import utils.excel2redis as rds
-
-    df = rds.getBatchData('2400-2019-11-03*', 2)
-    # df1 = DataFrame(df.values[:, [3, 1, 6, 10, 11, 12, 13, 14, 17]])
-    df1 = DataFrame(df.values[:, [3, 10,11]])
-    df2 = DataFrame(df1, dtype=np.float)
+    # import utils.excel2redis as rds
+    #
+    # df = rds.getBatchData('2400-2019-11-03*', 2)
+    # # df1 = DataFrame(df.values[:, [3, 1, 6, 10, 11, 12, 13, 14, 17]])
+    # df1 = DataFrame(df.values[:, [3, 10,11]])
+    # df2 = DataFrame(df1, dtype=np.float)
     # pointDiffList = [0,80,34,17,52,14,3,21,52]
     # df3=time_align_transform(df2,pointDiffList)
     # df_y = df3.values[:,0]
@@ -211,17 +209,33 @@ if __name__ == "__main__":
     #     data = read_sshc_data('4000-2019-10-'+dateStr[i]+'*')
     #     listDF.append(data)
 
+
+    import sshc.simulationRun.dataSource as ds
+    import sshc.simulationRun.batchProcess as bp
+
     aList = list()
     # for i in range(0,101,10):
     #     aList.append(i)
     from itertools import product as product
-    c = [i for i in range(1)]
+    c = [0]
     a = [i for i in range(101)]
     b = [i for i in range(101)]
     for item in product(c,a,b):
         aList.append(list(item))
     # ret = multi_pre_align_train(listDF,aList)
-    ret = align_train(df2,aList,_topNum=5)
+    df = ds.sshc_datasource(no=0).sshc_df
+    batch1 = bp.batch(df)
+    wtDFList = batch1.retrive_wt_data(_flowCol=1, _moistureCol=3, _triggerFlow=0, _triggerMoisture=16,
+                                      _delay=60)  # (2,1,0,16,60)
+    retList = []
+    for wtDF in wtDFList:
+        df1 = DataFrame(wtDF.values[:, [3, 10,11]])
+        df2 = DataFrame(df1, dtype=np.float)
+        ret = align_train(df2,aList,_topNum=5)
+        retList.append(ret)
+    dfRtl = DataFrame(aList)
+
+
 
     # feature_selection_sshc(df_x,df_y)
     # scores,mean_score = cross_score(df_x,df_y,10)
