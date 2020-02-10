@@ -29,15 +29,52 @@ class batch_sim_run():
         return df2
 
 
+class batch_running_process():
+    dfALL = DataFrame()
+    dfList = []
+    dfLast = DataFrame()
+    importCount = 0
+    lastLoc = 0
+
+    def __init__(self):
+        self.lastLoc=0
+
+    def import_running_data(self,_df=None):
+        if _df.empty:
+            return  None
+        self.dfList.append(_df)
+        self.dfALL = pd.concat([self.dfALL,_df],axis=0)
+        self.dfLast = _df
+        self.importCount = self.importCount + 1
+
+
+        self.lastLoc = self.lastLoc + _df.shape[0]
+        return 1
+
+
+
+    def __find_trigger_index(self, _series, _triggervalue=0, _than='>'):
+        if _than == '>':
+            loc1 = np.where(_series > _triggervalue)
+        else:
+            loc1 = np.where(_series < _triggervalue)
+        return loc1
+
+
+
+
 if __name__ == "__main__":
-    bRun1 = batch_sim_run(_no=0)
-    df = bRun1.batch_df_list[0]
+    bsr1 = batch_sim_run(_no=0)
+    df = bsr1.batch_df_list[0]
     dfL = len(df)
     n = 0
+    brp1 = batch_running_process()
     while(True):
-        df1 = bRun1.retrive_data_step(0,n,1000)
+        df1 = bsr1.retrive_data_step(0,n,1000)
         if df1.empty :
             break
+        brp1.import_running_data(df1)
+        loc1 = brp1.get_all(df1.values[:,9],0,'>')
         n = n + 1000
 
 
