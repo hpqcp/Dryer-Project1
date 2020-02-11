@@ -4,8 +4,9 @@ import dash_core_components as dcc
 import dash_html_components as html
 import plotly
 
-import sshc.modelPredict as  mp
+# import sshc.modelPredict as  mp
 import sshc.simulationRun.dataSource as ds
+import sshc.simulationRun.running_datasoure as rd
 
 # allDF = DataFrame()
 # for i in range(0, 14, 1):
@@ -19,11 +20,22 @@ import sshc.simulationRun.dataSource as ds
 # df_x = allDF.values[:, 1:]
 # df_y = allDF.values[:, 0]
 # rf_model, ss_x, ss_y = mp.randomForest_model(df_x, df_y)
-rf_model = mp.model_load('c://allX.m')
-ss_x = mp.model_load('c://allX-ss_x.m')
-ss_y = mp.model_load('c://allX-ss_y.m')
 
-df1 = ds.sshc_datasource(no=0).sshc_df
+bsr1 = rd.batch_sim_run(_no=0)
+df = bsr1.batch_df_list[1]
+# n = 0
+step = 10
+brp1 = rd.batch_running_process()
+# while(True):
+#     df1 = bsr1.retrive_data_step(0,n,step)
+#     if df1.empty :
+#         break
+#     brp1.import_running_data(df1)
+#     # loc1 = brp1.get_all(df1.values[:,9],0,'>')
+#     a = DataFrame([brp1.realYlist, brp1.predictYList]).T
+#
+#     n = n + step
+
 # batch1 = bp.batch(df1)
 # wtDFList = batch1.retrive_wt_data(_flowCol=1, _moistureCol=3, _triggerFlow=0, _triggerMoisture=16,
 #                                   _delay=60)  # (2,1,0,16,60)
@@ -47,35 +59,29 @@ app.layout = html.Div(
 
 @app.callback(Output('live-update-graph', 'figure'),[Input('interval-component', 'n_intervals')])
 def update_graph_live(n):
-    nLoc = n*50
-    if nLoc > df1.shape[0]:
-        nLoc = df1.shape[0]
-    testDF = df1.iloc[:n*100, :]  # pd.concat([headDF1,wtDFList[0].iloc[:i,:]],axis=0)
-    testDF = testDF.iloc[:, [3, 9, 6, 16, 15, 8]]
-    df_x1 = testDF.values[:, 1:]
-    df_y1 = testDF.values[:, 0]
-    scores, df_p = mp.randomForest_predict_score(rf_model, ss_x, ss_y, df_x1, df_y1, _isPlot=False)
+    print(str(n))
+    nLoc = n*step
+    df1 = bsr1.retrive_data_step(0, nLoc, step)
+    brp1.import_running_data(df1)
+    rList = brp1.realYlist[-50:]
+    pList = brp1.predictYList[-50:]
+    len1 = len(brp1.realYlist[:])
+    # len2 = len(rList)
     fig = plotly.subplots.make_subplots(rows=2, cols=1, vertical_spacing=0.2)
     # fig['layout']['margin'] = {
     #     'l': 30, 'r': 10, 'b': 30, 't': 10
     # }
     # fig['layout']['legend'] = {'x': 0, 'y': 1, 'xanchor': 'left'}
-    sLoc = 0
-    if nLoc>100 :
-        sLoc = nLoc - 100
-    data_y = df_p.values[sLoc:,0]
-    data_y1 = df_p.values[sLoc:, 1]
-    lens = len(data_y)
     fig.append_trace({
-        'x': [i for i in range(lens)],
-        'y': data_y,
+        'x': [i for i in range(len1)],
+        'y': rList,
         'name': '实际值',
         'mode': 'lines',#'lines+markers',
         'type': 'scatter'
     }, 1, 1)
     fig.append_trace({
-        'x': [i for i in range(lens)],
-        'y': data_y1,
+        'x': [i for i in range(len1)],
+        'y': pList,
         'name': '预测值',
         'mode': 'lines',
         'type': 'scatter'

@@ -128,7 +128,7 @@ def rf_model(_parmList):
 #传入源dataframe，输出对齐后df，有NA值的行都drop
 #_df : dataframe , 源数据df,要求全部列均为float型
 #_pointDifferList , list , 每一列参照第一列需要平移的量（int）,不需要平移输入0;大小为_df 相同
-def time_align_transform(_df,_pointDifferList):
+def time_align_transform(_df: object, _pointDifferList: object) -> object:
     df1 = [_df[x].shift(_pointDifferList[x]) for x in range(0,len(_pointDifferList),1)]
     df2 = DataFrame(df1).T
     df3=df2.dropna(axis=0,how='any')
