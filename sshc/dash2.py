@@ -49,6 +49,7 @@ app.layout = html.Div(
     html.Div([
         html.H4('Example'),
         dcc.Graph(id='live-update-graph'),
+        dcc.Graph(id='step-graph'),
         dcc.Interval(
             id='interval-component',
             interval=2*1000,
