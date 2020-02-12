@@ -66,33 +66,48 @@ def update_graph_live(n):
     brp1.import_running_data(df1)
     rList = brp1.realYlist[-50:]
     pList = brp1.predictYList[-50:]
+    cList =  list(map(lambda x: x[0]-x[1], zip(rList, pList)))
     len1 = len(brp1.realYlist[:])
-    # len2 = len(rList)
-    fig = plotly.subplots.make_subplots(rows=2, cols=1, vertical_spacing=0.2)
-    # fig['layout']['margin'] = {
-    #     'l': 30, 'r': 10, 'b': 30, 't': 10
-    # }
-    # fig['layout']['legend'] = {'x': 0, 'y': 1, 'xanchor': 'left'}
+    len2 = len(brp1.realYlist)
+    fig = plotly.subplots.make_subplots(rows=3, cols=1, vertical_spacing=0.05,subplot_titles=['五分钟水分对比','预测值-实际值差','全批次水分对比'])
+    fig['layout']['margin'] = {
+        'l': 10, 'r': 10, 'b': 10, 't': 10
+    }
+    fig['layout']['legend'] = {'x': 1, 'y': 0, 'xanchor': 'right', 'orientation':'h'}
     fig.append_trace({
         'x': [i for i in range(len1)],
         'y': rList,
-        'name': '实际值',
+        'name': '5分钟实际值',
         'mode': 'lines',#'lines+markers',
         'type': 'scatter'
     }, 1, 1)
     fig.append_trace({
         'x': [i for i in range(len1)],
         'y': pList,
-        'name': '预测值',
+        'name': '5分钟预测值',
         'mode': 'lines',
         'type': 'scatter'
     }, 1, 1)
-    # fig.append_trace({
-    #     'x': [i for i in range(lens)],
-    #     'y': df_p.values[:,2],
-    #     'name': 'Bar',
-    #     'type': 'bar'
-    # }, 1, 1)
+    fig.append_trace({
+        'x': [i for i in range(len2)],
+        'y': brp1.realYlist,
+        'name': '总览实际值',
+        'mode': 'lines',
+        'type': 'scatter'
+    }, 3, 1)
+    fig.append_trace({
+        'x': [i for i in range(len2)],
+        'y': brp1.predictYList,
+        'name': '总览预测值',
+        'mode': 'lines',
+        'type': 'scatter'
+    }, 3, 1)
+    fig.append_trace({
+        'x': [i for i in range(len1)],
+        'y': cList,
+        'name': '五分钟预测-实际差',
+        'type': 'bar'
+    }, 2, 1)
     return fig
 
 if __name__ == '__main__':
