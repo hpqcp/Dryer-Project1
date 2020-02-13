@@ -3,64 +3,114 @@ from dash.dependencies import Output,Input
 import dash_core_components as dcc
 import dash_html_components as html
 import plotly
+from pandas import DataFrame
 
 # import sshc.modelPredict as  mp
 import sshc.simulationRun.dataSource as ds
 import sshc.simulationRun.running_datasoure as rd
 
-# allDF = DataFrame()
-# for i in range(0, 14, 1):
-#     df = ds.sshc_datasource(no=i).sshc_df
-#     batch2 = bp.batch(df)
-#     wtDFList = batch2.retrive_wt_data(_flowCol=1, _moistureCol=3, _triggerFlow=0, _triggerMoisture=16,
-#                                       _delay=60)  # [df]
-#     for wtDF in wtDFList:
-#         allDF = pd.concat([allDF, wtDF], axis=0)
-# allDF = allDF.iloc[:, [3, 9, 6, 16, 15, 8]]
-# df_x = allDF.values[:, 1:]
-# df_y = allDF.values[:, 0]
-# rf_model, ss_x, ss_y = mp.randomForest_model(df_x, df_y)
 
+
+# 定义表格组件
+def create_table(df,max_rows=12):
+
+    """基于dataframe，设置表格格式"""
+    table = html.Table(
+        # Header
+        [
+            html.Tr(
+                [
+                    html.Th(col) for col in DataFrame(columns={'实际值','预测值'}).columns#df.columns
+                ]
+            )
+        ]
+        # # Body
+        # +[
+        #     html.Tr(
+        #         [
+        #             html.Td(
+        #                 df.iloc[i][col]
+        #             ) for col in df.columns
+        #         ]
+        #     ) for i in range(min(len(df), max_rows))
+        # ]
+    )
+    return table
+
+def batch_splite(_no):
+    import sshc.simulationRun.dataSource as ds
+    import sshc.simulationRun.batchProcess as bp
+    sshc_ds = ds.sshc_datasource(no=_no)
+    batch1 = bp.batch(sshc_ds.sshc_df)
+    batch1.batch_splite_byTime(interval=12)
+    rtList = batch1.spliteLocList
+    # dd = [{'label': '11月3日', 'value': 0},
+    #                  {'label': '11月4日', 'value': 1}]
+    listBatch=[]
+    for i in range(len(rtList)):
+        dictBatch = {}
+        dic1 = dateList[int(_no)]
+        label1 = dict1
+        key_list = list(filter(lambda k: dic1.get(k) == _no, dic1.keys()))
+        a = key_list[0]
+        dictBatch['label'] = dateList[int(_no)]+'-'+str(i+1)
+        dictBatch['value'] = str(_no)+'-'+str(rtList[i][0])+'-'+str(rtList[i][1])
+        listBatch.append(dictBatch)
+    listBatch.append({'label':'All','value':str(_no)+'-0-0'})
+    return listBatch
+
+
+dateList = [ {'label': '11月3日', 'value': 0},
+             {'label': '11月4日', 'value': 1},
+             {'label': '11月5日', 'value': 2},
+             {'label': '11月6日', 'value': 3},
+             {'label': '11月7日', 'value': 4},
+             {'label': '11月8日', 'value': 5},
+             {'label': '11月9日', 'value': 6},
+             {'label': '11月10日', 'value': 7},
+             {'label': '11月11日', 'value': 8},
+             {'label': '11月12日', 'value': 9},
+             {'label': '11月13日', 'value': 10},
+             {'label': '11月14日', 'value': 11},
+             {'label': '11月15日', 'value': 12},
+             {'label': '11月16日', 'value': 13}]
 bsr1 = rd.batch_sim_run(_no=0)
 df = bsr1.batch_df_list[1]
-# n = 0
 step = 10
 brp1 = rd.batch_running_process()
-# while(True):
-#     df1 = bsr1.retrive_data_step(0,n,step)
-#     if df1.empty :
-#         break
-#     brp1.import_running_data(df1)
-#     # loc1 = brp1.get_all(df1.values[:,9],0,'>')
-#     a = DataFrame([brp1.realYlist, brp1.predictYList]).T
-#
-#     n = n + step
-
-# batch1 = bp.batch(df1)
-# wtDFList = batch1.retrive_wt_data(_flowCol=1, _moistureCol=3, _triggerFlow=0, _triggerMoisture=16,
-#                                   _delay=60)  # (2,1,0,16,60)
-
-
-
-
-
 app = dash.Dash(__name__)
-app.layout = html.Div(
+app.layout = html.Div([
     html.Div([
-        html.H4('Example'),
+        html.H2('松散回潮水份预测'),
+        html.H1(' '),
+        html.Div([
+            html.Div([html.Label('生产日期选择:')],style={"float":"left","width":"150px"}),
+            html.Div([dcc.Dropdown(id='input-dropdown', options=dateList)],style={"float":"left","width":"200px"}),
+            html.Div([html.Label('批次选择:')],style={"float":"left","width":"150px"}),
+            html.Div([dcc.Dropdown(id='batch-dropdown')],style={"float":"left","width":"200px"}),
+            html.Div([],style={"clear":"left"})
+            ],style={'display':'inline',"height":"30px"}),
         dcc.Graph(id='live-update-graph'),
-        dcc.Graph(id='step-graph'),
         dcc.Interval(
             id='interval-component',
-            interval=2*1000,
+            interval=3*1000,
             n_intervals=0
-        )
-    ])
+        )],style={'text-align':'center'})#,
+    # html.Div([html.H4('美国农业出口数据表(2011年)'),create_table(df)])
+])
+
+@app.callback(
+    # Output('example-graph', 'figure'),
+    Output('batch-dropdown', 'options'),
+    [Input('input-dropdown', 'value')]
 )
+def update_output_div(input_value):
+    return batch_splite(input_value)
+
 
 @app.callback(Output('live-update-graph', 'figure'),[Input('interval-component', 'n_intervals')])
 def update_graph_live(n):
-    print(str(n))
+    # print(str(n))
     nLoc = n*step
     df1 = bsr1.retrive_data_step(0, nLoc, step)
     brp1.import_running_data(df1)
@@ -69,9 +119,9 @@ def update_graph_live(n):
     cList =  list(map(lambda x: x[0]-x[1], zip(rList, pList)))
     len1 = len(brp1.realYlist[:])
     len2 = len(brp1.realYlist)
-    fig = plotly.subplots.make_subplots(rows=3, cols=1, vertical_spacing=0.05,subplot_titles=['五分钟水分对比','预测值-实际值差','全批次水分对比'])
+    fig = plotly.subplots.make_subplots(rows=3, cols=1, vertical_spacing=0.2,subplot_titles=['五分钟水分对比','预测值-实际值差','全批次水分对比'])
     fig['layout']['margin'] = {
-        'l': 10, 'r': 10, 'b': 10, 't': 10
+        'l': 10, 'r': 10, 'b': 10, 't': 50
     }
     fig['layout']['legend'] = {'x': 1, 'y': 0, 'xanchor': 'right', 'orientation':'h'}
     fig.append_trace({

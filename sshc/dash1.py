@@ -161,8 +161,7 @@ app.layout = html.Div([
                      {'label': '11月14日', 'value': 11},
                      {'label': '11月15日', 'value': 12},
                      {'label': '11月16日', 'value': 13}
-                     ],
-                        value=0),
+                     ], value=0),
         html.Label('批次选择：'),
         dcc.Dropdown(id='batch-dropdown',options=[]),
         html.Label(id='output-text'),
