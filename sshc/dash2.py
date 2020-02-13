@@ -50,13 +50,13 @@ def batch_splite(_no):
     for i in range(len(rtList)):
         dictBatch = {}
         dic1 = dateList[int(_no)]
-        label1 = dict1
-        key_list = list(filter(lambda k: dic1.get(k) == _no, dic1.keys()))
-        a = key_list[0]
-        dictBatch['label'] = dateList[int(_no)]+'-'+str(i+1)
-        dictBatch['value'] = str(_no)+'-'+str(rtList[i][0])+'-'+str(rtList[i][1])
+        # key_list = list(filter(lambda k: dic1.get(k) == _no, dic1.keys()))
+        label1 = dic1['label']
+        value1 = dic1['value']
+        dictBatch['label'] = label1+' - 第 '+str(i+1)+' 批'
+        dictBatch['value'] = str(_no)+'-'+str(i)#+'-'+str(rtList[i][0])+'-'+str(rtList[i][1])
         listBatch.append(dictBatch)
-    listBatch.append({'label':'All','value':str(_no)+'-0-0'})
+    # listBatch.append({'label':'All','value':str(_no)+'-0-0'})
     return listBatch
 
 
@@ -75,9 +75,11 @@ dateList = [ {'label': '11月3日', 'value': 0},
              {'label': '11月15日', 'value': 12},
              {'label': '11月16日', 'value': 13}]
 bsr1 = rd.batch_sim_run(_no=0)
-df = bsr1.batch_df_list[1]
+batchNo = 0
 step = 10
 brp1 = rd.batch_running_process()
+batchDate = None
+
 app = dash.Dash(__name__)
 app.layout = html.Div([
     html.Div([
@@ -87,39 +89,62 @@ app.layout = html.Div([
             html.Div([html.Label('生产日期选择:')],style={"float":"left","width":"150px"}),
             html.Div([dcc.Dropdown(id='input-dropdown', options=dateList)],style={"float":"left","width":"200px"}),
             html.Div([html.Label('批次选择:')],style={"float":"left","width":"150px"}),
-            html.Div([dcc.Dropdown(id='batch-dropdown')],style={"float":"left","width":"200px"}),
+            html.Div([dcc.Dropdown(id='batch-dropdown')],style={"float":"left","width":"300px"}),
+            html.Div([html.Button('开  始',id='confirm-button')],style={"float":"left","width":"100px"}),
             html.Div([],style={"clear":"left"})
             ],style={'display':'inline',"height":"30px"}),
         dcc.Graph(id='live-update-graph'),
         dcc.Interval(
             id='interval-component',
             interval=3*1000,
-            n_intervals=0
+            n_intervals=0,disabled=True
         )],style={'text-align':'center'})#,
     # html.Div([html.H4('美国农业出口数据表(2011年)'),create_table(df)])
 ])
 
-@app.callback(
-    # Output('example-graph', 'figure'),
-    Output('batch-dropdown', 'options'),
-    [Input('input-dropdown', 'value')]
-)
+@app.callback(Output('batch-dropdown', 'options'),
+    [Input('input-dropdown', 'value')])
 def update_output_div(input_value):
     return batch_splite(input_value)
 
+@app.callback(Output('interval-component', 'disabled'),
+    [Input('batch-dropdown', 'value')])
+def update_interval(input_value):
+    if input_value == None:
+        return True
+    res = input_value.split('-')
+    global batchNo,batchDate,brp1
+    selectDate = int(res[0])
+    selectBatch = int(res[1])
+    batchNo = selectBatch
+    batchDate = selectDate
+    brp1.realYlist=[]
+    brp1.predictYList=[]
+    a=brp1
+    brp1 = rd.batch_running_process()
+
+
+    return False
+
+@app.callback(Output('interval-component', 'n_intervals'),
+    [Input('batch-dropdown', 'value')])
+def update_interval(input_value):
+    return 0
 
 @app.callback(Output('live-update-graph', 'figure'),[Input('interval-component', 'n_intervals')])
 def update_graph_live(n):
-    # print(str(n))
+    print(str(n))
+    global brp1
     nLoc = n*step
-    df1 = bsr1.retrive_data_step(0, nLoc, step)
+    df1 = bsr1.retrive_data_step(_batchNo= batchNo ,_startLoc = nLoc,_step = step)
+    a= len(brp1.realYlist)
     brp1.import_running_data(df1)
     rList = brp1.realYlist[-50:]
     pList = brp1.predictYList[-50:]
     cList =  list(map(lambda x: x[0]-x[1], zip(rList, pList)))
     len1 = len(brp1.realYlist[:])
     len2 = len(brp1.realYlist)
-    fig = plotly.subplots.make_subplots(rows=3, cols=1, vertical_spacing=0.2,subplot_titles=['五分钟水分对比','预测值-实际值差','全批次水分对比'])
+    fig = plotly.subplots.make_subplots(rows=3, cols=1, vertical_spacing=0.2,subplot_titles=['最近五分钟水分对比','预测值-实际值差','全批次水分对比'])
     fig['layout']['margin'] = {
         'l': 10, 'r': 10, 'b': 10, 't': 50
     }
