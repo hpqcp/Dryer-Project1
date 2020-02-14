@@ -5,7 +5,7 @@ from pandas import DataFrame
 import utils.excel2redis as rds
 
 class sshc_datasource():
-    sshc_df = None
+    # sshc_df = None
 
     def __init__(self, category='2400',no=0):
         self.sshc_df = self.__load_sshc_data(category,no)
