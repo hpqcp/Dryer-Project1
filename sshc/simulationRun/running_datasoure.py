@@ -13,8 +13,8 @@ class batch_sim_run():
     batch_df_list = []
     batch_Num = 0
 
-    def __init__(self, _category='2400',_no=0):
-        ds1 = ds.sshc_datasource(no=_no)
+    def __init__(self, _category: object = '2400', _dateNo: object = 0) -> object:
+        ds1 = ds.sshc_datasource(no=_dateNo)
         self.sshc_df = ds1.sshc_df
         bp1 = bp.batch(self.sshc_df)
         self.batch_df_list = bp1.batch_splite_byTime(interval=24)#流量列为第1列，超过24秒不连续就判定为不为同一批
@@ -118,8 +118,8 @@ class batch_running_process():
         pValues = self.__predict(model,testX,scalerx,scalery)
         self.realYlist.extend(testY[-_newRowNum:])
         self.predictYList.extend(pValues[-_newRowNum:])
-        print(str(len(testY)))
-        print(str(len(self.realYlist)))
+        # print(str(len(testY)))
+        # print(str(len(self.realYlist)))
 
         df_t = pd.DataFrame(pValues)
         df = DataFrame([testY, pValues]).T
