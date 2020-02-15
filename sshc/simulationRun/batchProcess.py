@@ -2,22 +2,23 @@ import numpy as np
 import pandas as pd
 
 class batch():
-    __df = pd.DataFrame()
-    spliteDFList = []
-    wholeDFList = []
-    wtDFList = []
-    headDFList = [] #料头
-    tailDFList = [] #料尾
-    spliteLocList = []
-    wholeLocList = []
-    wtLocList = []
-
-
     def __init__(self, df=None):
         self.__df = df
+        self.spliteDFList = []
+        self.wholeDFList = []
+        self.wtDFList = []
+        self.headDFList = []  # 料头
+        self.tailDFList = []  # 料尾
+        self.spliteLocList = []
+        self.wholeLocList = []
+        self.wtLocList = []
 
-
-    def batch_splite_byTime(self,interval = 1):#通过时间戳判断批次是否连续
+    def batch_splite_byTime(self,interval = 1):
+        """
+        通过时间戳判断批次是否连续
+        :param interval:是否连续判定时间，超过此时间即判定为不连续，单位：秒
+        :return: [df] , 分割后的多个df,组成的list
+        """
         if self.__df.empty:
             return None
         timeSeries = pd.to_datetime(self.__df[0]).values
@@ -36,7 +37,13 @@ class batch():
         self.spliteDFList = [self.__df.iloc[sList[i][0]:(sList[i][1]+1),:] for i in range(len(sList))]
         return self.spliteDFList
 
-    def batch_whole(self,_flowCol=0,_triggerValue=0):#通过流量判断批次开始结束,流量大于或小于0进行判断
+    def batch_whole(self,_flowCol=0,_triggerValue=0):
+        """
+        通过流量判断批次开始结束,流量大于或小于0进行判断
+        :param _flowCol: 流量列
+        :param _triggerValue: 触发值
+        :return: []
+        """
         dfList = self.spliteDFList
         retList = []
         locList=[]
@@ -108,6 +115,7 @@ if __name__ == "__main__":
         # rtList = b.batch_splite_byTime(interval=6)
         # ret = b.batch_whole(2,0)
         # mRet = b.batch_wt(1,16,60)
+        batch1.batch_splite_byTime()
         ret = batch1.retrive_wt_data(1,3,0,16,60)
         h = batch1.headDFList
         t = batch1.tailDFList

@@ -9,9 +9,9 @@ import sshc.timeAlignment as ta
 from sklearn.metrics import r2_score, mean_squared_error, mean_absolute_error
 
 class batch_sim_run():
-    sshc_df = None
-    batch_df_list = []
-    batch_Num = 0
+    # sshc_df = None
+    # batch_df_list = []
+    # batch_Num = 0
 
     def __init__(self, _category: object = '2400', _dateNo: object = 0) -> object:
         ds1 = ds.sshc_datasource(no=_dateNo)
@@ -32,35 +32,60 @@ class batch_sim_run():
         return df2
 
 class batch_running_process():
-    dfALL = DataFrame()
-    dfList = []
-    dfLast = DataFrame()
-    importCount = 0
-    lastLoc = 0
-    moisturePointIndex = -1
-    waterPointIndex = -1
-    diff_list = []
-    waterModel = None
-    waterScalerXModel = None
-    waterScalerYModel = None
-    realYlist = []
-    predictYList = []
+    # dfALL = DataFrame()
+    # dfList = []
+    # dfLast = DataFrame()
+    # importCount = 0
+    # lastLoc = 0
+    # moisturePointIndex = -1
+    # waterPointIndex = -1
+    # diff_list = []
+    # waterModel = None
+    # waterScalerXModel = None
+    # waterScalerYModel = None
+    # realYlist = []
+    # predictYList = []
 
     def __init__(self):
-        self.lastLoc=0
-        self.load_model('c:\\')
+        self.waterModel = None           #预测水分模型
+        self.waterScalerXModel = None    #模型的 X Scaler
+        self.waterScalerYModel = None    #模型的 Y Scaler
+
+        self.dfALL = DataFrame()        #已倒入的所有数据
+        self.dfList = []                #每一次倒入的数据LIST
+        self.dfLast = DataFrame()       #最后一次倒入的数据
+        self.importCount = 0            #累计数据条数
+        self.diff_list = []                  #各参数时间距离差
+
+        self.moisturePointIndex = -1         #
+        self.waterPointIndex = -1
+
+        self.realYlist = []                  #真实值list
+        self.predictYList = []               #预测值list
+
+        self.lastLoc=0                  #最后一个数据的index
+        self.load_model('c:\\')         #读取模型
 
     def load_model(self,_path):
+        """
+        读取预测模型
+        :param _path: 模型文件路径
+        :return: None
+        """
         model1 = mp.model_load(_path+'allX.m')
         ssxModel1 = mp.model_load(_path + 'allX-ss_x.m')
         ssyModel1 = mp.model_load(_path + 'allX-ss_y.m')
-
         self.waterModel = model1
         self.waterScalerXModel = ssxModel1
         self.waterScalerYModel = ssyModel1
         return
 
     def import_running_data(self,_df=None):
+        """
+        倒入运行时数据
+        :param _df: 数据
+        :return: None
+        """
         if _df.empty:
             return  None
         self.dfList.append(_df)
@@ -69,7 +94,7 @@ class batch_running_process():
         self.importCount = self.importCount + 1
         #find moisture and water begin point,than compute diff_list
         if self.moisturePointIndex == -1 or self.waterPointIndex == -1 :
-            self.get_key_timepoints()
+            self.__get_key_timepoints()
             if self.moisturePointIndex > -1 and self.waterPointIndex > -1 :
                 self.diff_list = self.__generate_timediff_list(_moistureValue=self.moisturePointIndex,_waterValue=self.waterPointIndex)
         #step predict
@@ -79,7 +104,7 @@ class batch_running_process():
         self.lastLoc = self.lastLoc + _df.shape[0]
         return
 
-    def get_key_timepoints(self):
+    def __get_key_timepoints(self):
         moistureTrigger = 1
         waterSetTrigger = 0.1
         moistureList = self.__find_trigger_index(self.dfALL.values[:,3],_triggervalue=moistureTrigger)
