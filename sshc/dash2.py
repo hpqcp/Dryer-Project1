@@ -11,32 +11,39 @@ import sshc.simulationRun.running_datasoure as rd
 
 
 
-# # 定义表格组件
-# def create_table(df,max_rows=12):
-#
-#     """基于dataframe，设置表格格式"""
-#     table = html.Table(
-#         # Header
-#         [
-#             html.Tr(
-#                 [
-#                     html.Th(col) for col in DataFrame(columns={'实际值','预测值'}).columns#df.columns
-#                 ]
-#             )
-#         ]
-#         # # Body
-#         # +[
-#         #     html.Tr(
-#         #         [
-#         #             html.Td(
-#         #                 df.iloc[i][col]
-#         #             ) for col in df.columns
-#         #         ]
-#         #     ) for i in range(min(len(df), max_rows))
-#         # ]
-#     )
-#     return table
-#
+# 定义表格组件
+def create_table(max_rows=12):
+    if run1 == None:
+        return None
+    rList = run1.batchRunProcess.realYList[-run1.step:]
+    pList = run1.batchRunProcess.predictYList[-run1.step:]
+    cList = list(map(lambda x: x[0] - x[1], zip(rList, pList)))
+    df = DataFrame([rList,pList,cList]).T
+    df.loc['平均值'] = df.apply(lambda x: x.mad())
+
+    """基于dataframe，设置表格格式"""
+    table = html.Table(
+        # Header
+        [
+            html.Tr(
+                [
+                    html.Th(col) for col in DataFrame(columns={'实际值','预测值','差值'}).columns#df.columns
+                ]
+            )
+        ]
+        # Body
+        +[
+            html.Tr(
+                [
+                    html.Td(
+                        df.iloc[i][col]
+                    ) for col in df.columns
+                ]
+            ) for i in range(min(len(df), max_rows))
+        ]
+    )
+    return table
+
 def batch_splite(_no):
     import sshc.simulationRun.dataSource as ds
     import sshc.simulationRun.batchProcess as bp
@@ -92,7 +99,7 @@ class dash_run():
         nLoc = _n * step
         df1 = self.dataDF.retrive_data_step(_batchNo=self.batchNo, _startLoc=nLoc, _step=step)
         self.batchRunProcess.import_running_data(df1)
-        rList = self.batchRunProcess.realYlist[:]
+        rList = self.batchRunProcess.realYList[:]
         pList = self.batchRunProcess.predictYList[:]
         cList = list(map(lambda x: x[0] - x[1], zip(rList, pList)))
         return rList,pList,cList
@@ -116,11 +123,19 @@ app.layout = html.Div([
         dcc.Graph(id='live-update-graph'),
         dcc.Interval(
             id='interval-component',
-            interval=3*1000,
+            interval=5*1000,
             n_intervals=0,disabled=True
-        )],style={'text-align':'center'})#,
-    # html.Div([html.H4('美国农业出口数据表(2011年)'),create_table(df)])
+        )],style={'text-align':'center'}),
+    html.Div([
+                html.Div([html.H4('最近五分钟水分明细'),html.Table(id='detail-table')],style={"float":"left","width":"300px"})
+    ],style={'display':'inline',"height":"300px"})
+
 ])
+
+@app.callback(Output('detail-table', 'children'),
+    [Input('interval-component', 'n_intervals')])
+def update_detail_table(n):
+    return create_table()
 
 @app.callback(Output('batch-dropdown', 'options'),
     [Input('input-dropdown', 'value')])

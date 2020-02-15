@@ -60,7 +60,7 @@ class batch_running_process():
         self.moisturePointIndex = -1         #
         self.waterPointIndex = -1
 
-        self.realYlist = []                  #真实值list
+        self.realYList = []                  #真实值list
         self.predictYList = []               #预测值list
 
         self.lastLoc=0                  #最后一个数据的index
@@ -141,7 +141,7 @@ class batch_running_process():
         testY = _df.values[:,0]
         testX = _df.values[:,1:]
         pValues = self.__predict(model,testX,scalerx,scalery)
-        self.realYlist.extend(testY[-_newRowNum:])
+        self.realYList.extend(testY[-_newRowNum:])
         self.predictYList.extend(pValues[-_newRowNum:])
         # print(str(len(testY)))
         # print(str(len(self.realYlist)))
