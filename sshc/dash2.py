@@ -19,7 +19,7 @@ def create_table(max_rows=12):
     pList = run1.batchRunProcess.predictYList[-run1.step:]
     cList = list(map(lambda x: x[0] - x[1], zip(rList, pList)))
     df = DataFrame([rList,pList,cList]).T
-    df.loc['平均值'] = df.apply(lambda x: x.mad())
+    df.loc['平均值'] = df.apply(lambda x: x.mad()) 
 
     """基于dataframe，设置表格格式"""
     table = html.Table(
