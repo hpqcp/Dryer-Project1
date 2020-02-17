@@ -61,7 +61,9 @@ class batch_running_process():
         self.waterPointIndex = -1
 
         self.realYList = []                  #真实值list
+        self.realYListTimeseries = []        #真实值时间列ListS
         self.predictYList = []               #预测值list
+        self.predictYListTimeseries = []     #预测值时间列ListS
 
         self.lastLoc=0                  #最后一个数据的index
         self.load_model('c:\\')         #读取模型
@@ -143,17 +145,17 @@ class batch_running_process():
         pValues = self.__predict(model,testX,scalerx,scalery)
         self.realYList.extend(testY[-_newRowNum:])
         self.predictYList.extend(pValues[-_newRowNum:])
+        self.realYListTimeseries = self.dfALL.values[:,0]
+        self.predictYListTimeseries = self.dfALL.values[:,0]
         # print(str(len(testY)))
         # print(str(len(self.realYlist)))
 
-        df_t = pd.DataFrame(pValues)
         df = DataFrame([testY, pValues]).T
         r2 = r2_score(df.values[:, 0], df.values[:, 1])
         mse = mean_squared_error(df.values[:, 0], df.values[:, 1])
         mae = mean_absolute_error(df.values[:, 0], df.values[:, 1])
         return {'R2': r2, 'MSE': mse, 'MAE': mae}, pValues
 
-        return pValues
 
     def __predict(self,_model,_x,_scalerX,_scalerY):
         xTest1 = _scalerX.transform(_x)

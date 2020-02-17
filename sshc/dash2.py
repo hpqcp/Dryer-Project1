@@ -19,7 +19,8 @@ def create_table(max_rows=12):
     pList = run1.batchRunProcess.predictYList[-run1.step:]
     cList = list(map(lambda x: x[0] - x[1], zip(rList, pList)))
     df = DataFrame([rList,pList,cList]).T
-    df.loc['平均值'] = df.apply(lambda x: x.mad()) 
+    df.loc['平均值'] = df.apply(lambda x: x.mad())
+    df = df.round(2)
 
     """基于dataframe，设置表格格式"""
     table = html.Table(
@@ -28,7 +29,7 @@ def create_table(max_rows=12):
             html.Tr(
                 [
                     html.Th(col) for col in DataFrame(columns={'实际值','预测值','差值'}).columns#df.columns
-                ]
+                ],style={'border':'1px solid #0094ff'}
             )
         ]
         # Body
@@ -38,7 +39,7 @@ def create_table(max_rows=12):
                     html.Td(
                         df.iloc[i][col]
                     ) for col in df.columns
-                ]
+                ],
             ) for i in range(min(len(df), max_rows))
         ]
     )
@@ -93,6 +94,7 @@ class dash_run():
         self.step = _step
         self.dataDF = rd.batch_sim_run(_dateNo=_batchDateNo)
         self.batchRunProcess = rd.batch_running_process()
+        self.dfAll = None
 
     def import_data(self,_n=0):
         step = self.step
@@ -102,7 +104,10 @@ class dash_run():
         rList = self.batchRunProcess.realYList[:]
         pList = self.batchRunProcess.predictYList[:]
         cList = list(map(lambda x: x[0] - x[1], zip(rList, pList)))
-        return rList,pList,cList
+        trList = self.batchRunProcess.realYListTimeseries
+        tpList = self.batchRunProcess.predictYListTimeseries
+        self.dfAll = self.batchRunProcess.dfALL
+        return rList,pList,cList,trList,tpList
 
 run1 = None
 
@@ -127,7 +132,9 @@ app.layout = html.Div([
             n_intervals=0,disabled=True
         )],style={'text-align':'center'}),
     html.Div([
-                html.Div([html.H4('最近五分钟水分明细'),html.Table(id='detail-table')],style={"float":"left","width":"300px"})
+                html.Div([html.H4('最近五分钟水分明细'),html.Table(id='detail-table')],style={"float":"left","width":"300px"}),
+                html.Div([dcc.Graph(id='water-live-update-graph')],style={"float":"left","width":"300px"}),
+                html.Div([],style={"clear":"left"})
     ],style={'display':'inline',"height":"300px"})
 
 ])
@@ -161,6 +168,33 @@ def update_interval(input_value):
 def update_interval(input_value):
     return 0
 #
+#
+@app.callback(Output('water-live-update-graph', 'figure'),[Input('interval-component', 'n_intervals')])
+def water_update_graph_live(n):
+    global run1
+    if run1 == None:
+        return plotly.subplots.make_subplots(rows=3, cols=1, vertical_spacing=0.2,
+                                             subplot_titles=['最近五分钟水分对比', '预测值-实际值差', '全批次水分对比'])
+    df = run1.dfAll
+    dt1 = df.values[:,0]
+    dt2 = df.values[:,1:]
+    fig = plotly.subplots.make_subplots(rows=1, cols=1, vertical_spacing=0.2,
+                                        subplot_titles=['最近五分钟水分对比', '预测值-实际值差', '全批次水分对比'])
+    fig['layout']['margin'] = {
+        'l': 10, 'r': 10, 'b': 10, 't': 50
+    }
+    # fig['layout']['legend'] = {'x': 1, 'y': 0, 'xanchor': 'right', 'orientation':'h'}
+    fig.append_trace({
+        'x': dt1,
+        'y': dt2,
+        'name': '5分钟实际值',
+        'mode': 'lines',  # 'lines+markers',
+        'type': 'scatter'
+    }, 1, 1)
+    return fig
+
+
+#
 @app.callback(Output('live-update-graph', 'figure'),[Input('interval-component', 'n_intervals')])
 def update_graph_live(n):
     print(str(n))
@@ -175,47 +209,49 @@ def update_graph_live(n):
     # rList = brp1.realYlist[-50:]
     # pList = brp1.predictYList[-50:]
     # cList =  list(map(lambda x: x[0]-x[1], zip(rList, pList)))
-    rList, pList, cList = run1.import_data(n)
+    rList, pList, cList ,trList,tpList= run1.import_data(n)
     srlist = rList[-50:]
     splist = pList[-50:]
     sclist = cList[-50:]
-    len1 = len(srlist)
-    len2 = len(rList)
+    strList = trList[-50:]
+    stpList = tpList[-50:]
+    # len1 = len(srlist)
+    # len2 = len(rList)
     fig = plotly.subplots.make_subplots(rows=3, cols=1, vertical_spacing=0.2,subplot_titles=['最近五分钟水分对比','预测值-实际值差','全批次水分对比'])
     fig['layout']['margin'] = {
         'l': 10, 'r': 10, 'b': 10, 't': 50
     }
-    fig['layout']['legend'] = {'x': 1, 'y': 0, 'xanchor': 'right', 'orientation':'h'}
+    # fig['layout']['legend'] = {'x': 1, 'y': 0, 'xanchor': 'right', 'orientation':'h'}
     fig.append_trace({
-        'x': [i for i in range(len1)],
+        'x': strList,
         'y': srlist,
         'name': '5分钟实际值',
         'mode': 'lines',#'lines+markers',
         'type': 'scatter'
     }, 1, 1)
     fig.append_trace({
-        'x': [i for i in range(len1)],
+        'x': strList,
         'y': splist,
         'name': '5分钟预测值',
         'mode': 'lines',
         'type': 'scatter'
     }, 1, 1)
     fig.append_trace({
-        'x': [i for i in range(len2)],
+        'x': trList,
         'y': rList,
         'name': '总览实际值',
         'mode': 'lines',
         'type': 'scatter'
     }, 3, 1)
     fig.append_trace({
-        'x': [i for i in range(len2)],
+        'x': trList,
         'y': pList,
         'name': '总览预测值',
         'mode': 'lines',
         'type': 'scatter'
     }, 3, 1)
     fig.append_trace({
-        'x': [i for i in range(len1)],
+        'x': strList,
         'y': sclist,
         'name': '五分钟预测-实际差',
         'type': 'bar'
