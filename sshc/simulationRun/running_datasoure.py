@@ -104,7 +104,7 @@ class batch_running_process():
         scores,pVlues = self.__running_predict(df_p,self.waterModel,self.waterScalerXModel,self.waterScalerYModel,_newRowNum = _df.shape[0])
         # print(scores)
         self.lastLoc = self.lastLoc + _df.shape[0]
-        return
+        return scores
 
     def __get_key_timepoints(self):
         moistureTrigger = 1

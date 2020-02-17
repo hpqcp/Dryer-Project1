@@ -4,23 +4,56 @@ import dash_core_components as dcc
 import dash_html_components as html
 import plotly
 from pandas import DataFrame
+import pandas as pd
+from datetime import datetime
 
 # import sshc.modelPredict as  mp
 import sshc.simulationRun.dataSource as ds
 import sshc.simulationRun.running_datasoure as rd
 
 
+def create_html():
+    if run1 == None :
+        return None
+    r2=run1.r2
+    mse = run1.mse
+    mae = run1.mae
+    df = DataFrame([r2,mse,mae]).T.round(4)
+    html1 = html.Table([
+            html.Tr(
+                [
+                    html.Th(col) for col in DataFrame(columns={'R2','MSE','MAE'}).columns#df.columns
+                ]
+            )]
+            + [
+                html.Tr(
+                    [
+                        html.Td(
+                            df.iloc[i][col], style={'border': 'solid 1px black', 'width': '100px'}
+                        ) for col in df.columns
+                    ],
+                ) for i in range(len(df))
+        ]
+    )
+    return html1
+
 
 # 定义表格组件
 def create_table(max_rows=12):
-    if run1 == None:
+    if run1 == None :
         return None
+
     rList = run1.batchRunProcess.realYList[-run1.step:]
     pList = run1.batchRunProcess.predictYList[-run1.step:]
     cList = list(map(lambda x: x[0] - x[1], zip(rList, pList)))
+    tList = run1.dfAll.values[-run1.step:,0]
     df = DataFrame([rList,pList,cList]).T
-    df.loc['平均值'] = df.apply(lambda x: x.mad())
+    # df.loc['平均值'] = df.apply(lambda x: x.mad())
     df = df.round(2)
+    df = pd.concat([DataFrame(tList),df],axis = 1)
+    df.columns = ['0','1','2','3']
+    df['0'] = pd.to_datetime(df['0'])
+    df['0'] = df['0'].map(lambda x: x.strftime('%H:%M:%S'))
 
     """基于dataframe，设置表格格式"""
     table = html.Table(
@@ -28,8 +61,8 @@ def create_table(max_rows=12):
         [
             html.Tr(
                 [
-                    html.Th(col) for col in DataFrame(columns={'实际值','预测值','差值'}).columns#df.columns
-                ],style={'border':'1px solid #0094ff'}
+                    html.Th(col) for col in DataFrame(columns={'时间','实际值','预测值','差值'}).columns#df.columns
+                ]
             )
         ]
         # Body
@@ -37,7 +70,7 @@ def create_table(max_rows=12):
             html.Tr(
                 [
                     html.Td(
-                        df.iloc[i][col]
+                        df.iloc[i][col],style={'border':'solid 1px black','width':'100px'}
                     ) for col in df.columns
                 ],
             ) for i in range(min(len(df), max_rows))
@@ -95,12 +128,19 @@ class dash_run():
         self.dataDF = rd.batch_sim_run(_dateNo=_batchDateNo)
         self.batchRunProcess = rd.batch_running_process()
         self.dfAll = None
+        self.r2 = None
+        self.mse = None
+        self.mae = None
 
     def import_data(self,_n=0):
         step = self.step
         nLoc = _n * step
         df1 = self.dataDF.retrive_data_step(_batchNo=self.batchNo, _startLoc=nLoc, _step=step)
-        self.batchRunProcess.import_running_data(df1)
+        scores = self.batchRunProcess.import_running_data(df1)
+        self.r2 = scores['R2']
+        self.mse = scores['MSE']
+        self.mae = scores['MAE']
+
         rList = self.batchRunProcess.realYList[:]
         pList = self.batchRunProcess.predictYList[:]
         cList = list(map(lambda x: x[0] - x[1], zip(rList, pList)))
@@ -132,12 +172,19 @@ app.layout = html.Div([
             n_intervals=0,disabled=True
         )],style={'text-align':'center'}),
     html.Div([
-                html.Div([html.H4('最近五分钟水分明细'),html.Table(id='detail-table')],style={"float":"left","width":"300px"}),
-                html.Div([dcc.Graph(id='water-live-update-graph')],style={"float":"left","width":"300px"}),
+                html.Div([html.H4('最近水分明细'),html.Table(id='detail-table')],style={"float":"left","width":"300px",'text-align':'center'}),
+                html.Div([html.H4('最近水分预测指标'),html.Table(id='predict-table')],style={"float":"left","width":"300px",'text-align':'center'}),
+                html.Div([dcc.Graph(id='water-live-update-graph')],style={"float":"right"}),
                 html.Div([],style={"clear":"left"})
     ],style={'display':'inline',"height":"300px"})
 
 ])
+
+@app.callback(Output('predict-table', 'children'),
+    [Input('interval-component', 'n_intervals')])
+def update_detail_table(n):
+    return create_html()
+
 
 @app.callback(Output('detail-table', 'children'),
     [Input('interval-component', 'n_intervals')])
@@ -173,13 +220,14 @@ def update_interval(input_value):
 def water_update_graph_live(n):
     global run1
     if run1 == None:
-        return plotly.subplots.make_subplots(rows=3, cols=1, vertical_spacing=0.2,
-                                             subplot_titles=['最近五分钟水分对比', '预测值-实际值差', '全批次水分对比'])
+        return plotly.subplots.make_subplots(rows=1, cols=1, vertical_spacing=0.2,
+                                             subplot_titles=['加水量趋势', '预测值-实际值差', '全批次水分对比'])
     df = run1.dfAll
     dt1 = df.values[:,0]
-    dt2 = df.values[:,1:]
+    dt2 = df.values[:,10]
+    dt3 = df.values[:, 9]
     fig = plotly.subplots.make_subplots(rows=1, cols=1, vertical_spacing=0.2,
-                                        subplot_titles=['最近五分钟水分对比', '预测值-实际值差', '全批次水分对比'])
+                                        subplot_titles=['加水量趋势', '预测值-实际值差', '全批次水分对比'])
     fig['layout']['margin'] = {
         'l': 10, 'r': 10, 'b': 10, 't': 50
     }
@@ -187,7 +235,14 @@ def water_update_graph_live(n):
     fig.append_trace({
         'x': dt1,
         'y': dt2,
-        'name': '5分钟实际值',
+        'name': '实际加水量',
+        'mode': 'lines',  # 'lines+markers',
+        'type': 'scatter'
+    }, 1, 1)
+    fig.append_trace({
+        'x': dt1,
+        'y': dt3,
+        'name': '加水量设定值',
         'mode': 'lines',  # 'lines+markers',
         'type': 'scatter'
     }, 1, 1)
