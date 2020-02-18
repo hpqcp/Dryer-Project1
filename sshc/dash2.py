@@ -13,16 +13,17 @@ import sshc.simulationRun.running_datasoure as rd
 
 
 def create_html():
-    if run1 == None :
+    if run1 == None or run1.dfAll.empty:
         return None
     r2=run1.r2
     mse = run1.mse
     mae = run1.mae
-    df = DataFrame([r2,mse,mae]).T.round(4)
+    df = DataFrame([r2,mse,mae]).T.round(5)
+    df.columns = ['R2', 'MSE', 'MAE']
     html1 = html.Table([
             html.Tr(
                 [
-                    html.Th(col) for col in DataFrame(columns={'R2','MSE','MAE'}).columns#df.columns
+                    html.Th(col) for col in df.columns
                 ]
             )]
             + [
@@ -40,7 +41,7 @@ def create_html():
 
 # 定义表格组件
 def create_table(max_rows=12):
-    if run1 == None :
+    if run1 == None or run1.dfAll.empty:
         return None
 
     rList = run1.batchRunProcess.realYList[-run1.step:]
@@ -51,9 +52,9 @@ def create_table(max_rows=12):
     # df.loc['平均值'] = df.apply(lambda x: x.mad())
     df = df.round(2)
     df = pd.concat([DataFrame(tList),df],axis = 1)
-    df.columns = ['0','1','2','3']
-    df['0'] = pd.to_datetime(df['0'])
-    df['0'] = df['0'].map(lambda x: x.strftime('%H:%M:%S'))
+    df.columns = ['时间','实际值','预测值','差值']
+    df['时间'] = pd.to_datetime(df['时间'])
+    df['时间'] = df['时间'].map(lambda x: x.strftime('%H:%M:%S'))
 
     """基于dataframe，设置表格格式"""
     table = html.Table(
@@ -61,7 +62,7 @@ def create_table(max_rows=12):
         [
             html.Tr(
                 [
-                    html.Th(col) for col in DataFrame(columns={'时间','实际值','预测值','差值'}).columns#df.columns
+                    html.Th(col) for col in df.columns
                 ]
             )
         ]
@@ -127,7 +128,7 @@ class dash_run():
         self.step = _step
         self.dataDF = rd.batch_sim_run(_dateNo=_batchDateNo)
         self.batchRunProcess = rd.batch_running_process()
-        self.dfAll = None
+        self.dfAll = DataFrame()
         self.r2 = None
         self.mse = None
         self.mae = None
@@ -171,9 +172,10 @@ app.layout = html.Div([
             interval=5*1000,
             n_intervals=0,disabled=True
         )],style={'text-align':'center'}),
-    html.Div([
+    html.Div([  html.Div([html.H4('')],style={"float":"left","width":"50px",'background':'blue'}),
                 html.Div([html.H4('最近水分明细'),html.Table(id='detail-table')],style={"float":"left","width":"300px",'text-align':'center'}),
-                html.Div([html.H4('最近水分预测指标'),html.Table(id='predict-table')],style={"float":"left","width":"300px",'text-align':'center'}),
+                html.Div([html.H4('')],style={"float":"left","width":"50px",'background':'blue'}),
+                html.Div([html.H4('最近水分预测指标'),html.Table(id='predict-table')],style={"float":"left","width":"400px",'text-align':'center','background':'red'}),
                 html.Div([dcc.Graph(id='water-live-update-graph')],style={"float":"right"}),
                 html.Div([],style={"clear":"left"})
     ],style={'display':'inline',"height":"300px"})
