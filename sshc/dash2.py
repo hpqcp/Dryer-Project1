@@ -11,6 +11,7 @@ from datetime import datetime
 import sshc.simulationRun.dataSource as ds
 import sshc.simulationRun.running_datasoure as rd
 
+app = dash.Dash(__name__)
 
 def create_html():
     if run1 == None or run1.dfAll.empty:
@@ -37,7 +38,6 @@ def create_html():
         ]
     )
     return html1
-
 
 # 定义表格组件
 def create_table(max_rows=12):
@@ -150,10 +150,13 @@ class dash_run():
         self.dfAll = self.batchRunProcess.dfALL
         return rList,pList,cList,trList,tpList
 
+def load_app(_app):
+    global app
+    app = dash.Dash(__name__, server=_app, url_base_pathname='/dash/')
+    return app
+
 run1 = None
-
-
-app = dash.Dash(__name__)
+# app = dash.Dash(__name__)
 app.layout = html.Div([
     html.Div([
         html.H2('松散回潮水份预测'),
@@ -186,7 +189,6 @@ app.layout = html.Div([
     [Input('interval-component', 'n_intervals')])
 def update_detail_table(n):
     return create_html()
-
 
 @app.callback(Output('detail-table', 'children'),
     [Input('interval-component', 'n_intervals')])
