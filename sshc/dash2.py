@@ -11,7 +11,19 @@ from datetime import datetime
 import sshc.simulationRun.dataSource as ds
 import sshc.simulationRun.running_datasoure as rd
 
-app = dash.Dash(__name__)
+
+
+
+app = dash.Dash(__name__, server=app_main, url_base_pathname='/dash2/')
+
+def load_app(_app):
+    global app
+    app = dash.Dash(__name__, server=_app, url_base_pathname='/dash2/')
+    return app
+
+def load_default_app():
+    global app
+    return app
 
 def create_html():
     if run1 == None or run1.dfAll.empty:
@@ -150,10 +162,7 @@ class dash_run():
         self.dfAll = self.batchRunProcess.dfALL
         return rList,pList,cList,trList,tpList
 
-def load_app(_app):
-    global app
-    app = dash.Dash(__name__, server=_app, url_base_pathname='/dash/')
-    return app
+
 
 run1 = None
 # app = dash.Dash(__name__)
@@ -316,6 +325,8 @@ def update_graph_live(n):
         'type': 'bar'
     }, 2, 1)
     return fig
+
+
 
 if __name__ == '__main__':
     app.run_server(debug=True)

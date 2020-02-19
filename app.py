@@ -5,19 +5,18 @@ import json
 # import gb.interface as gb_ine
 import pandas as pd
 import datetime as dat
-import sshc.dash2 as dash2
-from werkzeug.middleware import dispatcher
-from werkzeug.serving import run_simple
+from sshc.dash2 import *
 
-app = Flask(__name__)
-dash_app = dash2.load_app(app)
+
+app_main = Flask(__name__)
+dash_app = load_default_app()
 # from gevent import monkey
 # from gevent.pywsgi import WSGIServer
 # monkey.patch_all()
+print
 
 
-
-@app.route('/login.do',methods=['POST','GET'])
+@app_main.route('/login.do',methods=['POST','GET'])
 def login():
     print(url_for('login'))#通过函数名找函数对应的地址
     userName = request.form.get('userName')#表单提交的数据用form
@@ -32,11 +31,11 @@ def login():
     return render_template('login.html')
     pass
 
-@app.route('/logout.do',methods=['POST,GET'])
+@app_main.route('/logout.do',methods=['POST,GET'])
 def logout():
     pass
 
-@app.route('/')
+@app_main.route('/')
 def index():
     # sessionLen = len(session.keys())
     # if sessionLen == 0 :
@@ -50,13 +49,11 @@ def index():
     pass
 
 
-@app.route('/dash')
+@app_main.route('/dash')
 def dash():
     return redirect('/dash2')
 
-app = dispatcher.DispatcherMiddleware(app, {
-    '/dash2': dash_app.server
-})
+
 
 # @app.route('/index')
 # #http://127.0.0.1:5000/index?p=1&type=2
@@ -201,8 +198,7 @@ app = dispatcher.DispatcherMiddleware(app, {
 
 
 if __name__ == '__main__':
-    # app.config['SECRET_KEY'] = '1234567890'
-    # app.run(host='0.0.0.0', port=5000,threaded=True,debug=False)
-    run_simple(hostname='0.0.0.0', port=5000,application=app,use_reloader=True,use_debugger=True)
+    app_main.config['SECRET_KEY'] = '1234567890'
+    app_main.run(host='127.0.0.1', port=5000,threaded=True,debug=False)
     # http_server = WSGIServer(('0.0.0.0', 5000), app)
     # http_server.serve_forever()
