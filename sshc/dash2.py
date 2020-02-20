@@ -2,6 +2,7 @@ import dash
 from dash.dependencies import Output,Input
 import dash_core_components as dcc
 import dash_html_components as html
+import dash_auth
 import plotly
 from pandas import DataFrame
 import pandas as pd
@@ -14,16 +15,19 @@ import sshc.simulationRun.running_datasoure as rd
 
 
 
-app = dash.Dash(__name__, server=app_main, url_base_pathname='/dash2/')
 
-def load_app(_app):
-    global app
-    app = dash.Dash(__name__, server=_app, url_base_pathname='/dash2/')
-    return app
+VALID_USERNAME_PASSWORD_PAIRS = {
+    'admin': 'sshc2020'
+}
 
-def load_default_app():
-    global app
-    return app
+app = dash.Dash(__name__)
+a = app.server.request_class.remote_addr
+auth = dash_auth.BasicAuth(
+    app,
+    VALID_USERNAME_PASSWORD_PAIRS
+)
+
+
 
 def create_html():
     if run1 == None or run1.dfAll.empty:
@@ -31,8 +35,10 @@ def create_html():
     r2=run1.r2
     mse = run1.mse
     mae = run1.mae
-    df = DataFrame([r2,mse,mae]).T.round(5)
-    df.columns = ['R2', 'MSE', 'MAE']
+    df = DataFrame([r2,mse,mae]).round(5)
+    df1 = DataFrame(['R2','MSE','MAE'])
+    df = pd.concat([df1,df],axis=1)
+    df.columns = ['指标名','指标值']
     html1 = html.Table([
             html.Tr(
                 [
@@ -92,24 +98,27 @@ def create_table(max_rows=12):
     return table
 
 def batch_splite(_no):
-    import sshc.simulationRun.dataSource as ds
-    import sshc.simulationRun.batchProcess as bp
-    sshc_ds = ds.sshc_datasource(no=_no)
-    batch1 = bp.batch(sshc_ds.sshc_df)
-    batch1.batch_splite_byTime(interval=12)
-    rtList = batch1.spliteLocList
-    # dd = [{'label': '11月3日', 'value': 0},
-    #                  {'label': '11月4日', 'value': 1}]
+    # import sshc.simulationRun.dataSource as ds
+    # import sshc.simulationRun.batchProcess as bp
+    # sshc_ds = ds.sshc_datasource(no=_no)
+    # batch1 = bp.batch(sshc_ds.sshc_df)
+    # batch1.batch_splite_byTime(interval=12)
+    # rtList = batch1.spliteLocList
+    # # dd = [{'label': '11月3日', 'value': 0},
+    # #                  {'label': '11月4日', 'value': 1}]
+    batch1 = dash_run.batchList
     listBatch=[]
-    for i in range(len(rtList)):
+    for i in range(len(batch1)):
         dictBatch = {}
-        dic1 = dash_run.dateList[int(_no)]
+        dic1 = dash_run.batchList[i]
         # key_list = list(filter(lambda k: dic1.get(k) == _no, dic1.keys()))
         label1 = dic1['label']
         value1 = dic1['value']
-        dictBatch['label'] = label1+' - 第 '+str(i+1)+' 批'
-        dictBatch['value'] = str(_no)+'-'+str(i)#+'-'+str(rtList[i][0])+'-'+str(rtList[i][1])
-        listBatch.append(dictBatch)
+        dateValue1 = dic1['date']
+        if dateValue1 == _no:
+            dictBatch['label'] = label1
+            dictBatch['value'] = str(_no)+'-'+str(value1)#+'-'+str(rtList[i][0])+'-'+str(rtList[i][1])
+            listBatch.append(dictBatch)
     # listBatch.append({'label':'All','value':str(_no)+'-0-0'})
     return listBatch
 
@@ -124,10 +133,35 @@ class dash_run():
                  {'label': '11月10日', 'value': 7},
                  {'label': '11月11日', 'value': 8},
                  {'label': '11月12日', 'value': 9},
-                 {'label': '11月13日', 'value': 10},
-                 {'label': '11月14日', 'value': 11},
-                 {'label': '11月15日', 'value': 12},
-                 {'label': '11月16日', 'value': 13}]
+                 {'label': '11月14日', 'value': 10},
+                 {'label': '11月15日', 'value': 11},
+                 {'label': '11月16日', 'value': 12},
+                 {'label': '11月17日', 'value': 13}]
+    batchList = [{'label': '11月3日 第 1 批', 'value': 0,'date':0},
+                 {'label': '11月3日 第 2 批', 'value': 1, 'date': 0},
+                 {'label': '11月4日 第 1 批', 'value': 0, 'date': 1},
+                 {'label': '11月4日 第 2 批', 'value': 1, 'date': 1},
+                 {'label': '11月5日 第 1 批', 'value': 0, 'date': 2},
+                 {'label': '11月5日 第 2 批', 'value': 1, 'date': 2},
+                 {'label': '11月6日 第 1 批', 'value': 0, 'date': 3},
+                 {'label': '11月6日 第 2 批', 'value': 1, 'date': 3},
+                 {'label': '11月7日 第 1 批', 'value': 0, 'date': 4},
+                 {'label': '11月7日 第 2 批', 'value': 1, 'date': 4},
+                 {'label': '11月8日 第 1 批', 'value': 0, 'date': 5},
+                 {'label': '11月8日 第 2 批', 'value': 1, 'date': 5},
+                 {'label': '11月9日 第 1 批', 'value': 0, 'date': 6},
+                 {'label': '11月10日 第 1 批', 'value': 0, 'date': 7},
+                 {'label': '11月10日 第 2 批', 'value': 1, 'date': 7},
+                 {'label': '11月11日 第 1 批', 'value': 0, 'date': 8},
+                 {'label': '11月11日 第 2 批', 'value': 1, 'date': 8},
+                 {'label': '11月12日 第 1 批', 'value': 0, 'date': 9},
+                 {'label': '11月12日 第 2 批', 'value': 1, 'date': 9},
+                 {'label': '11月14日 第 1 批', 'value': 0, 'date': 10},
+                 {'label': '11月15日 第 1 批', 'value': 0, 'date': 11},
+                 {'label': '11月16日 第 1 批', 'value': 0, 'date': 12},
+                 {'label': '11月17日 第 1 批', 'value': 0, 'date': 13},
+
+    ]
     # dataDF = None
     # batchDateNo = 0
     # batchNo = 0
@@ -162,8 +196,6 @@ class dash_run():
         self.dfAll = self.batchRunProcess.dfALL
         return rList,pList,cList,trList,tpList
 
-
-
 run1 = None
 # app = dash.Dash(__name__)
 app.layout = html.Div([
@@ -175,7 +207,6 @@ app.layout = html.Div([
             html.Div([dcc.Dropdown(id='input-dropdown', options=dash_run.dateList)],style={"float":"left","width":"200px"}),
             html.Div([html.Label('批次选择:')],style={"float":"left","width":"150px"}),
             html.Div([dcc.Dropdown(id='batch-dropdown')],style={"float":"left","width":"300px"}),
-            html.Div([html.Button('开  始',id='confirm-button')],style={"float":"left","width":"100px"}),
             html.Div([],style={"clear":"left"})
             ],style={'display':'inline',"height":"30px"}),
         dcc.Graph(id='live-update-graph'),
@@ -184,10 +215,10 @@ app.layout = html.Div([
             interval=5*1000,
             n_intervals=0,disabled=True
         )],style={'text-align':'center'}),
-    html.Div([  html.Div([html.H4('')],style={"float":"left","width":"50px",'background':'blue'}),
+    html.Div([  html.Div([html.H4('')],style={"float":"left","width":"50px"}),
                 html.Div([html.H4('最近水分明细'),html.Table(id='detail-table')],style={"float":"left","width":"300px",'text-align':'center'}),
-                html.Div([html.H4('')],style={"float":"left","width":"50px",'background':'blue'}),
-                html.Div([html.H4('最近水分预测指标'),html.Table(id='predict-table')],style={"float":"left","width":"400px",'text-align':'center','background':'red'}),
+                html.Div([html.H4('')],style={"float":"left","width":"50px"}),
+                html.Div([html.H4('最近水分预测指标'),html.Table(id='predict-table')],style={"float":"left","width":"200px",'text-align':'center'}),
                 html.Div([dcc.Graph(id='water-live-update-graph')],style={"float":"right"}),
                 html.Div([],style={"clear":"left"})
     ],style={'display':'inline',"height":"300px"})
@@ -233,6 +264,9 @@ def update_interval(input_value):
 def water_update_graph_live(n):
     global run1
     if run1 == None:
+        return plotly.subplots.make_subplots(rows=1, cols=1, vertical_spacing=0.2,
+                                             subplot_titles=['加水量趋势', '预测值-实际值差', '全批次水分对比'])
+    if run1.dfAll.empty:
         return plotly.subplots.make_subplots(rows=1, cols=1, vertical_spacing=0.2,
                                              subplot_titles=['加水量趋势', '预测值-实际值差', '全批次水分对比'])
     df = run1.dfAll
@@ -329,4 +363,4 @@ def update_graph_live(n):
 
 
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run_server(host='0.0.0.0',debug=True)
