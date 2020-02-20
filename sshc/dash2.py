@@ -21,7 +21,7 @@ VALID_USERNAME_PASSWORD_PAIRS = {
 }
 
 app = dash.Dash(__name__)
-a = app.server.request_class.remote_addr
+a = app.server.request_class.remote_addr 
 auth = dash_auth.BasicAuth(
     app,
     VALID_USERNAME_PASSWORD_PAIRS
