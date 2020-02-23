@@ -21,7 +21,6 @@ VALID_USERNAME_PASSWORD_PAIRS = {
 }
 
 app = dash.Dash(__name__)
-a = app.server.request_class.remote_addr 
 auth = dash_auth.BasicAuth(
     app,
     VALID_USERNAME_PASSWORD_PAIRS
@@ -194,7 +193,9 @@ class dash_run():
         trList = self.batchRunProcess.realYListTimeseries
         tpList = self.batchRunProcess.predictYListTimeseries
         self.dfAll = self.batchRunProcess.dfALL
-        return rList,pList,cList,trList,tpList
+        df_return = DataFrame([rList,pList,cList,trList,tpList]).T
+        return df_return
+        # return rList,pList,cList,trList,tpList
 
 run1 = None
 # app = dash.Dash(__name__)
@@ -220,7 +221,8 @@ app.layout = html.Div([
                 html.Div([html.H4('')],style={"float":"left","width":"50px"}),
                 html.Div([html.H4('最近水分预测指标'),html.Table(id='predict-table')],style={"float":"left","width":"200px",'text-align':'center'}),
                 html.Div([dcc.Graph(id='water-live-update-graph')],style={"float":"right"}),
-                html.Div([],style={"clear":"left"})
+                html.Div([],style={"clear":"left"}),
+    html.Div(id='intermediate-value', style={'display': 'none'})
     ],style={'display':'inline',"height":"300px"})
 
 ])
@@ -242,16 +244,30 @@ def update_output_div(input_value):
         return []
     return batch_splite(input_value)
 
+#定时器开启
 @app.callback(Output('interval-component', 'disabled'),
     [Input('batch-dropdown', 'value')])
 def update_interval(input_value):
     if input_value == None:
         return True
+    # res = input_value.split('-')
+    # selectDate = int(res[0])
+    # selectBatch = int(res[1])
+    # global  run1
+    # run1 =  dash_run(selectDate,selectBatch)
+    return False
+#
+#定时器开启
+@app.callback(Output('intermediate-value', 'children'),
+    [Input('batch-dropdown', 'value')])
+def update_interval(input_value):
+    if input_value == None:
+        return None
     res = input_value.split('-')
     selectDate = int(res[0])
     selectBatch = int(res[1])
-    global  run1
-    run1 =  dash_run(selectDate,selectBatch)
+    run2 =  dash_run(selectDate,selectBatch)
+
     return False
 #
 @app.callback(Output('interval-component', 'n_intervals'),
