@@ -103,8 +103,15 @@ class batch_running_process():
         df_p = DataFrame(self.dfALL.values[:,[3, 9, 6, 16, 15, 8]])
         scores,pVlues = self.__running_predict(df_p,self.waterModel,self.waterScalerXModel,self.waterScalerYModel,_newRowNum = _df.shape[0])
         # print(scores)
+        ####
+        seriesTest = df_p.values[:,0]
+        seriesPredic = pVlues
+        seriesDiff = list(map(lambda x: x[0] - x[1], zip(seriesTest, seriesPredic)))
+        seriesTime = _df.values[:,0]
+        rtlDF = DataFrame([seriesTime,seriesTest,seriesPredic,seriesDiff]).T
+        ####
         self.lastLoc = self.lastLoc + _df.shape[0]
-        return scores
+        return scores,rtlDF
 
     def __get_key_timepoints(self):
         moistureTrigger = 1
