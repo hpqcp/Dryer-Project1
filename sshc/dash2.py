@@ -4,7 +4,7 @@ import dash
 from dash.dependencies import Output,Input,State
 import dash_core_components as dcc
 import dash_html_components as html
-# import dash_auth
+import dash_auth
 import plotly
 from pandas import DataFrame
 import pandas as pd
@@ -24,80 +24,78 @@ VALID_USERNAME_PASSWORD_PAIRS = {
 
 app = dash.Dash(__name__)
 server = app.server
-# auth = dash_auth.BasicAuth(
-#     app,
-#     VALID_USERNAME_PASSWORD_PAIRS
-# )
+auth = dash_auth.BasicAuth(
+    app,
+    VALID_USERNAME_PASSWORD_PAIRS
+)
 
-def create_html():
-    # if run1 == None or run1.dfAll.empty:
-    #     return None
-    # r2=run1.r2
-    # mse = run1.mse
-    # mae = run1.mae
-    # df = DataFrame([r2,mse,mae]).round(5)
-    # df1 = DataFrame(['R2','MSE','MAE'])
-    # df = pd.concat([df1,df],axis=1)
-    # df.columns = ['指标名','指标值']
-    # html1 = html.Table([
-    #         html.Tr(
-    #             [
-    #                 html.Th(col) for col in df.columns
-    #             ]
-    #         )]
-    #         + [
-    #             html.Tr(
-    #                 [
-    #                     html.Td(
-    #                         df.iloc[i][col], style={'border': 'solid 1px black', 'width': '100px'}
-    #                     ) for col in df.columns
-    #                 ],
-    #             ) for i in range(len(df))
-    #     ]
-    # )
-    # return html1
-    return None
+def create_html(_df=None,max_rows=12):
+    if _df.empty:
+        return None
+
+    df = _df.iloc[:, [1, 2, 3]]
+    r2 = df.values[0,0]
+    mse = df.values[0,1]
+    mae = df.values[0,2]
+    df = DataFrame([r2,mse,mae]).round(5)
+    df1 = DataFrame(['R2','MSE','MAE'])
+    df = pd.concat([df1,df],axis=1)
+    df.columns = ['指标名','指标值']
+    html1 = html.Table([
+            html.Tr(
+                [
+                    html.Th(col) for col in df.columns
+                ]
+            )]
+            + [
+                html.Tr(
+                    [
+                        html.Td(
+                            df.iloc[i][col], style={'border': 'solid 1px black', 'width': '100px'}
+                        ) for col in df.columns
+                    ],
+                ) for i in range(len(df))
+        ]
+    )
+    return html1
+
 
 # 定义表格组件
-def create_table(max_rows=12):
-    # if run1 == None or run1.dfAll.empty:
-    #     return None
-    #
-    # rList = run1.batchRunProcess.realYList[-run1.step:]
-    # pList = run1.batchRunProcess.predictYList[-run1.step:]
-    # cList = list(map(lambda x: x[0] - x[1], zip(rList, pList)))
-    # tList = run1.dfAll.values[-run1.step:,0]
-    # df = DataFrame([rList,pList,cList]).T
-    # # df.loc['平均值'] = df.apply(lambda x: x.mad())
-    # df = df.round(2)
+def create_table(_df=None,max_rows=12):
+    if _df.empty:
+        return None
+
+    df = _df.iloc[:,[0,1,2,3]]
+
+    df = df.round(3)
     # df = pd.concat([DataFrame(tList),df],axis = 1)
-    # df.columns = ['时间','实际值','预测值','差值']
-    # df['时间'] = pd.to_datetime(df['时间'])
-    # df['时间'] = df['时间'].map(lambda x: x.strftime('%H:%M:%S'))
-    #
-    # """基于dataframe，设置表格格式"""
-    # table = html.Table(
-    #     # Header
-    #     [
-    #         html.Tr(
-    #             [
-    #                 html.Th(col) for col in df.columns
-    #             ]
-    #         )
-    #     ]
-    #     # Body
-    #     +[
-    #         html.Tr(
-    #             [
-    #                 html.Td(
-    #                     df.iloc[i][col],style={'border':'solid 1px black','width':'100px'}
-    #                 ) for col in df.columns
-    #             ],
-    #         ) for i in range(min(len(df), max_rows))
-    #     ]
-    # )
-    # return table
-    return None
+    df.columns = ['时间','实际值','预测值','差值']
+    df['时间'] = pd.to_datetime(df['时间'])
+    df['时间'] = df['时间'].map(lambda x: x.strftime('%H:%M:%S'))
+
+    """基于dataframe，设置表格格式"""
+    table = html.Table(
+        # Header
+        [
+            html.Tr(
+                [
+                    html.Th(col) for col in df.columns
+                ]
+            )
+        ]
+        # Body
+        +[
+            html.Tr(
+                [
+                    html.Td(
+                        df.iloc[i][col],style={'border':'solid 1px black','width':'100px'}
+                    ) for col in df.columns
+                ],
+            ) for i in range(min(len(df), max_rows))
+        ]
+    )
+    return table
+
 
 def batch_splite(_no):
     # import sshc.simulationRun.dataSource as ds
@@ -164,6 +162,10 @@ class dash_run():
                  {'label': '11月17日 第 1 批', 'value': 0, 'date': 13},
 
     ]
+    intervalList = [{'label': '3秒', 'value': 3},
+                    {'label': '5秒', 'value': 5},
+                    {'label': '10秒', 'value': 10},
+                    {'label': '20秒', 'value': 20}]
     # dataDF = None
     # batchDateNo = 0
     # batchNo = 0
@@ -203,8 +205,12 @@ class dash_run():
         steps = (_n+1) * _step
         dataDF = rd.batch_sim_run(_dateNo=_batchDateNo)
         df1 = dataDF.retrive_data_step(_batchNo=_batchNo, _startLoc=0, _step=steps)
+        df1=df1.reset_index(drop=True)
         brp = rd.batch_running_process()
         score,rtlDF = brp.import_running_data(_df=df1)
+        print(str(rtlDF.shape[0])+'-'+str(df1.shape[0]))
+        df2 = df1.iloc[:,[9,10]]
+        rtlDF = pd.concat([rtlDF,df2],axis=1,join='inner')
         return score,rtlDF
 
 app.layout = html.Div([ 
@@ -213,11 +219,13 @@ app.layout = html.Div([
         html.H1(' '),
         html.Div([
             html.Div([html.Label('生产日期选择:')],style={"float":"left","width":"150px"}),
-            html.Div([dcc.Dropdown(id='input-dropdown', options=dash_run.dateList)],style={"float":"left","width":"200px"}),
-            html.Div([html.Label('批次选择:')],style={"float":"left","width":"150px"}),
-            html.Div([dcc.Dropdown(id='batch-dropdown')],style={"float":"left","width":"300px"}),
+            html.Div([dcc.Dropdown(id='input-dropdown', options=dash_run.dateList)],style={"float":"left","width":"150px"}),
+            html.Div([html.Label('批次选择:')],style={"float":"left","width":"100px"}),
+            html.Div([dcc.Dropdown(id='batch-dropdown')],style={"float":"left","width":"200px"}),
+            # html.Div([html.Label('刷新频率:')],style={"float":"left","width":"100px"}),
+            # html.Div([dcc.Dropdown(id='interval-dropdown',options=dash_run.intervalList,value=5)],style={"float":"left","width":"100px"}),
             html.Div([html.Button(id='submit-button', n_clicks=0, children='提交')],style={"float":"left","width":"150px"}),
-            html.Div([dcc.Input(id='n-state',value='-1')],style={"float":"left","width":"150px"}),
+            html.Div([dcc.Input(id='n-state',value='-1')],style={"float":"left","width":"150px",'display': 'none'}),
             html.Div([],style={"clear":"left"})
             ],style={'display':'inline',"height":"30px"}),
         dcc.Graph(id='live-update-graph'),
@@ -226,14 +234,15 @@ app.layout = html.Div([
             interval=5*1000,
             n_intervals=0,disabled=False
         )],style={'text-align':'center'}),
-        html.Div(id='batch-state', style={'display': 'none'})
-    # html.Div([html.Div([html.H4('')],style={"float":"left","width":"50px"}),
-    #             # html.Div([html.H4('最近水分明细'),html.Table(id='detail-table')],style={"float":"left","width":"300px",'text-align':'center'}),
-    #             html.Div([html.H4('')],style={"float":"left","width":"50px"}),
-    #             # html.Div([html.H4('最近水分预测指标',id='output-state'),html.Table(id='predict-table')],style={"float":"left","width":"200px",'text-align':'center'}),
-    #             html.Div([dcc.Graph(id='water-live-update-graph')],style={"float":"right"}),
-    #             html.Div([],style={"clear":"left"})
-    # ],style={'display':'inline',"height":"300px"})
+        html.Div(id='df-state', style={'display': 'none'}),
+        html.Div(id='batch-state', style={'display': 'none'}),
+    html.Div([html.Div([html.H4('')],style={"float":"left","width":"50px"}),
+                html.Div([html.H4('最近水分明细'),html.Table(id='detail-table')],style={"float":"left","width":"300px",'text-align':'center'}),
+                html.Div([html.H4('')],style={"float":"left","width":"50px"}),
+                html.Div([html.H4('最近水分预测指标'),html.Table(id='predict-table')],style={"float":"left","width":"200px",'text-align':'center'}),
+                html.Div([dcc.Graph(id='water-live-update-graph')],style={"float":"right"}),
+                html.Div([],style={"clear":"left"})
+    ],style={'display':'inline',"height":"300px"})
 ])
 
 
@@ -256,24 +265,54 @@ def update_output(n_clicks, input1, input2):
 #定时器清零
 @app.callback(Output('interval-component', 'n_intervals'),
     [Input('submit-button', 'n_clicks')])
-def update_interval(input_value):
+def reset_interval(input_value):
     return 0
+
+
 @app.callback(Output('n-state', 'value'),
               [Input('interval-component', 'n_intervals')],)
 def update_n(n):
     return str(n)
 
+@app.callback(Output('df-state', 'children'),
+              [Input('interval-component', 'n_intervals')],
+              [State('batch-state', 'children')])
+def update_df_state(n,batchState):
+    print(str(n))
+    if batchState == None:
+        return None
+    res = batchState.split('-')
+    selectDate = int(res[0])
+    selectBatch = int(res[1])
+    score , rtlDF = dash_run.import_data_once(selectDate,selectBatch,_n=n)
+    df3 = [{1:score['R2'],2:score['MSE'],3:score['MAE']}]
+    rtlDF = rtlDF.append(df3,ignore_index=True)
+    return rtlDF.to_json(date_format='iso', orient='split')
 
+@app.callback(Output('detail-table', 'children'),
+    [Input('df-state', 'children')])
+def update_detail_table(input_json):
+    if input_json == None:
+        return None
+    rtlDF = pd.read_json(input_json, orient='split')[:-1]
+    df = rtlDF[-10:]
+    return create_table(_df=df)
+
+@app.callback(Output('predict-table', 'children'),
+    [Input('df-state', 'children')])
+def update_predict_table(input_json):
+    if input_json == None:
+        return None
+    rtlDF = pd.read_json(input_json, orient='split')
+    df = rtlDF[-1:]
+    return create_html(_df=df)
 
 # @app.callback(Output('predict-table', 'children'),
 #     [Input('interval-component', 'n_intervals')])
 # def update_detail_table(n):
 #     return create_html()
 #
-# @app.callback(Output('detail-table', 'children'),
-#     [Input('interval-component', 'n_intervals')])
-# def update_detail_table(n):
-#     return create_table()
+
 #
 
 #
@@ -310,57 +349,47 @@ def update_n(n):
 #     return 0
 # #
 # #
-# @app.callback(Output('water-live-update-graph', 'figure'),[Input('interval-component', 'n_intervals')])
-# def water_update_graph_live(n):
-#     global run1
-#     if run1 == None:
-#         return plotly.subplots.make_subplots(rows=1, cols=1, vertical_spacing=0.2,
-#                                              subplot_titles=['加水量趋势', '预测值-实际值差', '全批次水分对比'])
-#     if run1.dfAll.empty:
-#         return plotly.subplots.make_subplots(rows=1, cols=1, vertical_spacing=0.2,
-#                                              subplot_titles=['加水量趋势', '预测值-实际值差', '全批次水分对比'])
-#     df = run1.dfAll
-#     dt1 = df.values[:,0]
-#     dt2 = df.values[:,10]
-#     dt3 = df.values[:, 9]
-#     fig = plotly.subplots.make_subplots(rows=1, cols=1, vertical_spacing=0.2,
-#                                         subplot_titles=['加水量趋势', '预测值-实际值差', '全批次水分对比'])
-#     fig['layout']['margin'] = {
-#         'l': 10, 'r': 10, 'b': 10, 't': 50
-#     }
-#     # fig['layout']['legend'] = {'x': 1, 'y': 0, 'xanchor': 'right', 'orientation':'h'}
-#     fig.append_trace({
-#         'x': dt1,
-#         'y': dt2,
-#         'name': '实际加水量',
-#         'mode': 'lines',  # 'lines+markers',
-#         'type': 'scatter'
-#     }, 1, 1)
-#     fig.append_trace({
-#         'x': dt1,
-#         'y': dt3,
-#         'name': '加水量设定值',
-#         'mode': 'lines',  # 'lines+markers',
-#         'type': 'scatter'
-#     }, 1, 1)
-#     return fig
+@app.callback(Output('water-live-update-graph', 'figure'),[Input('df-state', 'children')])
+def water_update_graph_live(input_json):
+    if input_json == None:
+        return plotly.subplots.make_subplots(rows=1, cols=1, vertical_spacing=0.2,
+                                             subplot_titles=['加水量趋势', '预测值-实际值差', '全批次水分对比'])
+    rtlDF = pd.read_json(input_json, orient='split')[:-1]
+    df = rtlDF
+    dt1 = df.values[:,0]
+    dt2 = df.values[:,5]
+    dt3 = df.values[:, 4]
+    fig = plotly.subplots.make_subplots(rows=1, cols=1, vertical_spacing=0.2,
+                                        subplot_titles=['加水量趋势', '预测值-实际值差', '全批次水分对比'])
+    fig['layout']['margin'] = {
+        'l': 10, 'r': 10, 'b': 10, 't': 50
+    }
+    # fig['layout']['legend'] = {'x': 1, 'y': 0, 'xanchor': 'right', 'orientation':'h'}
+    fig.append_trace({
+        'x': dt1,
+        'y': dt2,
+        'name': '实际加水量',
+        'mode': 'lines',  # 'lines+markers',
+        'type': 'scatter'
+    }, 1, 1)
+    fig.append_trace({
+        'x': dt1,
+        'y': dt3,
+        'name': '加水量设定值',
+        'mode': 'lines',  # 'lines+markers',
+        'type': 'scatter'
+    }, 1, 1)
+    return fig
 #
 #
 #
 @app.callback(Output('live-update-graph', 'figure'),
-              [Input('interval-component', 'n_intervals')],
-              [State('batch-state', 'children')])
-def update_graph_live(n,batchState):
-    print(str(batchState))
-    if batchState == None:
-        return plotly.subplots.make_subplots(rows=3, cols=1, vertical_spacing=0.2,subplot_titles=['最近五分钟水分对比','预测值-实际值差','全批次水分对比'])
-    res = batchState.split('-')
-    selectDate = int(res[0])
-    selectBatch = int(res[1])
-    score , rtlDF = dash_run.import_data_once(selectDate,selectBatch,_n=n)
+              [Input('df-state', 'children')])
+def update_graph_live(input_json):
 
-    if rtlDF.empty :
+    if input_json == None:
         return plotly.subplots.make_subplots(rows=3, cols=1, vertical_spacing=0.2,subplot_titles=['最近五分钟水分对比','预测值-实际值差','全批次水分对比'])
+    rtlDF = pd.read_json(input_json, orient='split')[:-1]
 
     # rList, pList, cList ,trList,tpList= run1.import_data(n)
     trList = rtlDF.values[:,0]
