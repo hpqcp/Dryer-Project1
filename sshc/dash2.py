@@ -8,13 +8,19 @@ import dash_auth
 import plotly
 from pandas import DataFrame
 import pandas as pd
-from datetime import datetime
-
-# import sshc.modelPredict as  mp
-import sshc.simulationRun.dataSource as ds
+from flask import request
+import logging
 import sshc.simulationRun.running_datasoure as rd
 
 
+
+logger = logging.getLogger(__name__)
+logger.setLevel(level = logging.INFO)
+handler = logging.FileHandler("log.txt")
+handler.setLevel(logging.INFO)
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+handler.setFormatter(formatter)
+logger.addHandler(handler)
 
 
 
@@ -24,10 +30,18 @@ VALID_USERNAME_PASSWORD_PAIRS = {
 
 app = dash.Dash(__name__)
 server = app.server
+
+@server.before_request
+def request_bind():
+    if not auth.is_authorized():
+        logger.info(request.remote_addr)
+
+
 auth = dash_auth.BasicAuth(
     app,
     VALID_USERNAME_PASSWORD_PAIRS
 )
+
 
 def create_html(_df=None,max_rows=12):
     if _df.empty:
@@ -208,7 +222,7 @@ class dash_run():
         df1=df1.reset_index(drop=True)
         brp = rd.batch_running_process()
         score,rtlDF = brp.import_running_data(_df=df1)
-        print(str(rtlDF.shape[0])+'-'+str(df1.shape[0]))
+        # print(str(rtlDF.shape[0])+'-'+str(df1.shape[0]))
         df2 = df1.iloc[:,[9,10]]
         rtlDF = pd.concat([rtlDF,df2],axis=1,join='inner')
         return score,rtlDF
@@ -278,7 +292,7 @@ def update_n(n):
               [Input('interval-component', 'n_intervals')],
               [State('batch-state', 'children')])
 def update_df_state(n,batchState):
-    print(str(n))
+    # print(str(n))
     if batchState == None:
         return None
     res = batchState.split('-')
